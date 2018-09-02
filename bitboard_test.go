@@ -18,16 +18,19 @@ func TestBitboardSet(t *testing.T) {
 
 func TestBitboardGet(t *testing.T) {
 	bitboard, _ := NewBitboard(100)
-	value, _ := bitboard.Get()
+	value := bitboard.Get()
 	assert.Equal(t, value, uint64(100))
 }
 
-func TestBitboardLsb(t *testing.T) {
+func TestBitboardClz(t *testing.T) {
 	bitboard, _ := NewBitboard(1)
-	position, _ := bitboard.Lsb()
-	assert.Equal(t, position, 0)
+	position := bitboard.Clz()
+	assert.Equal(t, 63, position)
 }
 
-// func TestBitboardMsb(t *testing.T) {
+func TestBitboardCtz(t *testing.T) {
+	bitboard, _ := NewBitboard(1)
+	position := bitboard.Ctz()
+	assert.Equal(t, 0, position)
+}
 
-// }

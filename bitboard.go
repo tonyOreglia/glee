@@ -1,6 +1,8 @@
 package bitboard
 
-import ()
+import (
+	"math/bits"
+)
 
 type Bitboard struct {
  	bitboard uint64
@@ -16,6 +18,16 @@ func (b *Bitboard) Set(bb uint64) error {
 	return nil
 }
 
-func (b *Bitboard) Get() (uint64, error) {
-	return b.bitboard, nil
+func (b *Bitboard) Get() (uint64) {
+	return b.bitboard
+}
+
+// count leading zeros
+func (b *Bitboard) Clz() (int) {
+	return bits.LeadingZeros64(b.Get())
+}
+
+// count leading zeros
+func (b *Bitboard) Ctz() (int) {
+	return bits.TrailingZeros64(b.Get())
 }
