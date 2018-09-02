@@ -18,16 +18,27 @@ func (b *Bitboard) Set(bb uint64) error {
 	return nil
 }
 
+func (b *Bitboard) SetBit(bit uint8) error {
+	b.bitboard = 1 << bit
+	return nil
+}
+
 func (b *Bitboard) Get() (uint64) {
 	return b.bitboard
 }
 
 // count leading zeros
-func (b *Bitboard) Clz() (int) {
-	return bits.LeadingZeros64(b.Get())
+func (b *Bitboard) Clz() (uint8) {
+	return uint8(bits.LeadingZeros64(b.Get()))
 }
 
 // count leading zeros
-func (b *Bitboard) Ctz() (int) {
-	return bits.TrailingZeros64(b.Get())
+func (b *Bitboard) Ctz() (uint8) {
+	return uint8(bits.TrailingZeros64(b.Get()))
+}
+
+// Does not check that this bit is set as speed is priority.
+func (b *Bitboard) Pop(pos uint8) (error) {
+	b.bitboard ^= 1 << pos
+	return nil
 }

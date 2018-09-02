@@ -25,12 +25,25 @@ func TestBitboardGet(t *testing.T) {
 func TestBitboardClz(t *testing.T) {
 	bitboard, _ := NewBitboard(1)
 	position := bitboard.Clz()
-	assert.Equal(t, 63, position)
+	assert.Equal(t, uint8(63), position)
 }
 
 func TestBitboardCtz(t *testing.T) {
 	bitboard, _ := NewBitboard(1)
 	position := bitboard.Ctz()
-	assert.Equal(t, 0, position)
+	assert.Equal(t, uint8(0), position)
+}
+
+func TestBitboardSetBit(t *testing.T) {
+	bitboard, _ := NewBitboard(0)
+	bitboard.SetBit(7)
+	assert.Equal(t, bitboard.Get(), uint64(128))
+}
+
+func TestBitboardPop(t *testing.T) {
+	bitboard, _ := NewBitboard(0)
+	bitboard.SetBit(7)
+	bitboard.Pop(bitboard.Ctz())
+	assert.Equal(t, bitboard.Get(), uint64(0))
 }
 
