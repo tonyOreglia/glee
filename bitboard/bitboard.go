@@ -2,6 +2,8 @@ package bitboard
 
 import (
 	"math/bits"
+	"fmt"
+	"strconv"
 )
 
 type Bitboard struct {
@@ -23,6 +25,11 @@ func (b *Bitboard) SetBit(bit uint8) error {
 	return nil
 }
 
+func (b *Bitboard) GetBit(bit uint8) int {
+	if ((uint64(1) << bit) & b.bitboard) != uint64(0) { return 1 }
+	return 0
+}
+
 func (b *Bitboard) Get() (uint64) {
 	return b.bitboard
 }
@@ -41,4 +48,15 @@ func (b *Bitboard) Ctz() (uint8) {
 func (b *Bitboard) Pop(pos uint8) (error) {
 	b.bitboard ^= 1 << pos
 	return nil
+}
+
+func (b *Bitboard) Print() {
+	var i uint8
+	fmt.Println("")
+	for i = 0; i<64; i++ {
+			fmt.Print(strconv.Itoa(b.GetBit(i)))
+			if ((i+1) % 8) == 0 { fmt.Println("") }
+	}
+	fmt.Println("")
+	fmt.Println("")
 }

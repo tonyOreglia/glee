@@ -46,4 +46,3 @@ func TestBitboardPop(t *testing.T) {
 	bitboard.Pop(bitboard.Ctz())
 	assert.Equal(t, bitboard.Get(), uint64(0))
 }
-
