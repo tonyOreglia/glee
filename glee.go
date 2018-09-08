@@ -1,11 +1,12 @@
 package main
 
 import (
+	"github.com/tonyoreglia/glee/hashtables"
 	"github.com/tonyoreglia/glee/position"
 )
 
 func main() {
-	calculateAllLookupBbs()
+	hashtables.CalculateAllLookupBbs()
 }
 
 func verifyStartingPositionVisually() {

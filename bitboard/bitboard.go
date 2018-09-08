@@ -46,12 +46,12 @@ func (b *Bitboard) Value() uint64 {
 }
 
 // count leading zeros
-func (b *Bitboard) Clz() int {
-	return int(bits.LeadingZeros64(b.Value()))
+func (b *Bitboard) Msb() int {
+	return 63 - int(bits.LeadingZeros64(b.Value()))
 }
 
 // count leading zeros
-func (b *Bitboard) Ctz() int {
+func (b *Bitboard) Lsb() int {
 	return int(bits.TrailingZeros64(b.Value()))
 }
 
