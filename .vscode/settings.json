@@ -1,0 +1,7 @@
+{
+  "go.lintOnSave": "workspace",
+  "go.liveErrors": {
+    "enabled": true,
+    "delay": 500
+  }
+}
