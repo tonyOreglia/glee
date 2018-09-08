@@ -19,7 +19,7 @@ Tony's golang chess engine.
 - [ ] Update position
 
 - [ ] Rate position
- - Simple piece wise
- - Positional
+  - Simple piece wise
+  - Positional
 
 - [ ] Search position
