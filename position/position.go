@@ -55,8 +55,8 @@ func (p *Position) AllOccupiedSqsBb() uint64 {
 }
 
 // ActiveSideOccupiedSqsBb returns bitboard representing which squares the active side occupies
-func (p *Position) ActiveSideOccupiedSqsBb() uint64 {
-	return p.bitboards[p.activeSide].OccupiedSqs.Value()
+func (p *Position) ActiveSideOccupiedSqsBb() *bitboard.Bitboard {
+	return &p.bitboards[p.activeSide].OccupiedSqs
 }
 
 // GetActiveSide returns the currently active side
@@ -166,7 +166,6 @@ func (p *Position) convertActiveSideToString() (string, error) {
 }
 
 func (p *Position) setActiveSide(activeSide int) {
-	fmt.Println(activeSide)
 	p.activeSide = activeSide
 }
 

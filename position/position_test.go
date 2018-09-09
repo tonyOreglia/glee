@@ -45,6 +45,9 @@ func TestPositionContructorFen(t *testing.T) {
 
 	position, _ = NewPositionFen("7k/8/8/8/8/8/8/6KB w KQkq - 0 1")
 	assert.Equal(t, "7k/8/8/8/8/8/8/6KB w KQkq - 0 1", position.GetFenString())
+
+	position, _ = NewPositionFen("7k/8/8/8/8/8/8/Rq6 w KQkq - 0 1")
+	assert.Equal(t, "7k/8/8/8/8/8/8/Rq6 w KQkq - 0 1", position.GetFenString())
 }
 
 func TestPositionUpdate(t *testing.T) {

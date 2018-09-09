@@ -17,6 +17,15 @@ func NewBitboard(bb uint64) (*Bitboard, error) {
 	return bitboard, nil
 }
 
+// NewBbFromMovesSlice takes a legal moves slice and returns a bitboard representing those moves
+func NewBbFromMovesSlice(mvs [][2]int) *Bitboard {
+	bitboard := &Bitboard{}
+	for i := 0; i < len(mvs); i++ {
+		bitboard.SetBit(mvs[i][1])
+	}
+	return bitboard
+}
+
 func (b *Bitboard) Set(bb uint64) error {
 	b.bitboard = bb
 	return nil
@@ -24,6 +33,10 @@ func (b *Bitboard) Set(bb uint64) error {
 
 func (b *Bitboard) Combine(bb *Bitboard) {
 	b.bitboard |= bb.Value()
+}
+
+func (b *Bitboard) RemoveOverlappingBits(bb *Bitboard) {
+	b.bitboard &^= bb.Value()
 }
 
 func (b *Bitboard) SetBit(bit int) error {

@@ -3,6 +3,7 @@
 package hashtables
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -66,6 +67,7 @@ func CalculateAllLookupBbs() *HashTables {
 	generateSingleBitLookup(hashTables)
 	generateArrayBitboardLookup(hashTables)
 	generateEnPassantBitboardLookup(hashTables)
+	PrintAllBitboards(hashTables)
 	return hashTables
 }
 
@@ -159,45 +161,45 @@ func generateArrayBitboardLookup(ht *HashTables) {
 			ht.KnightAttackBbHash[index] |= ht.SingleIndexBbHash[index-15]
 		}
 
-		ht.LegalKingMovesBbHash[0][index] = 0
+		ht.LegalKingMovesBbHash[1][index] = 0
 		if index != 63 {
-			ht.LegalKingMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+1]
+			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+1]
 		}
 		if index != 0 {
-			ht.LegalKingMovesBbHash[0][index] |= ht.SingleIndexBbHash[index-1]
+			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-1]
 		}
 		if index <= 55 {
-			ht.LegalKingMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+8]
+			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+8]
 		}
 		if index >= 8 {
-			ht.LegalKingMovesBbHash[0][index] |= ht.SingleIndexBbHash[index-8]
+			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-8]
 		}
 		if index <= 54 {
-			ht.LegalKingMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+9]
+			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+9]
 		}
 		if index >= 9 {
-			ht.LegalKingMovesBbHash[0][index] |= ht.SingleIndexBbHash[index-9]
+			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-9]
 		}
 		if index <= 56 {
-			ht.LegalKingMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+7]
+			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+7]
 		}
 		if index >= 7 {
-			ht.LegalKingMovesBbHash[0][index] |= ht.SingleIndexBbHash[index-7]
+			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-7]
 		}
-		ht.LegalKingMovesBbHash[1][index] = ht.LegalKingMovesBbHash[0][index]
+		ht.LegalKingMovesBbHash[0][index] = ht.LegalKingMovesBbHash[1][index]
 		if ht.SingleIndexBbHash[index]&ht.AfileBb != 0 {
-			ht.LegalKingMovesBbHash[0][index] &= ^ht.HfileBb
 			ht.LegalKingMovesBbHash[1][index] &= ^ht.HfileBb
+			ht.LegalKingMovesBbHash[0][index] &= ^ht.HfileBb
 		}
 		if ht.SingleIndexBbHash[index]&ht.HfileBb != 0 {
-			ht.LegalKingMovesBbHash[0][index] &= ^ht.AfileBb
 			ht.LegalKingMovesBbHash[1][index] &= ^ht.AfileBb
+			ht.LegalKingMovesBbHash[0][index] &= ^ht.AfileBb
 		}
 		if index == 4 {
-			ht.LegalKingMovesBbHash[0][4] |= ht.SingleIndexBbHash[2] | ht.SingleIndexBbHash[6]
+			ht.LegalKingMovesBbHash[1][4] |= ht.SingleIndexBbHash[2] | ht.SingleIndexBbHash[6]
 		}
 		if index == 60 {
-			ht.LegalKingMovesBbHash[1][60] |= ht.SingleIndexBbHash[62] | ht.SingleIndexBbHash[58]
+			ht.LegalKingMovesBbHash[0][60] |= ht.SingleIndexBbHash[62] | ht.SingleIndexBbHash[58]
 		}
 		ht.LegalPawnMovesBbHash[0][index] = 0
 		ht.LegalPawnMovesBbHash[1][index] = 0
@@ -238,25 +240,37 @@ func generateArrayBitboardLookup(ht *HashTables) {
 	}
 }
 
+func PrintAllBitboardValues(ht *HashTables) {
+	fmt.Print(ht)
+}
+
 // PrintAllBitboards prints all hash lookups to a local file
 func PrintAllBitboards(ht *HashTables) {
 	f, _ := os.Create("hash-tables.txt")
 	defer f.Close()
 	f.Write([]byte("\tA FILE"))
+	f.Write([]byte(strconv.Itoa(int(ht.AfileBb))))
 	printBitBoard(f, ht.AfileBb)
 	f.Write([]byte("\tB FILE:"))
+	f.Write([]byte(strconv.Itoa(int(ht.BfileBb))))
 	printBitBoard(f, ht.BfileBb)
 	f.Write([]byte("\tC FILE:"))
+	f.Write([]byte(strconv.Itoa(int(ht.CfileBb))))
 	printBitBoard(f, ht.CfileBb)
 	f.Write([]byte("\tD FILE:"))
+	f.Write([]byte(strconv.Itoa(int(ht.DfileBb))))
 	printBitBoard(f, ht.DfileBb)
 	f.Write([]byte("\tE FILE:"))
+	f.Write([]byte(strconv.Itoa(int(ht.EfileBb))))
 	printBitBoard(f, ht.EfileBb)
 	f.Write([]byte("\tF FILE:"))
+	f.Write([]byte(strconv.Itoa(int(ht.FfileBb))))
 	printBitBoard(f, ht.FfileBb)
 	f.Write([]byte("\tG FILE:"))
+	f.Write([]byte(strconv.Itoa(int(ht.GfileBb))))
 	printBitBoard(f, ht.GfileBb)
 	f.Write([]byte("\tH FILE:"))
+	f.Write([]byte(strconv.Itoa(int(ht.HfileBb))))
 	printBitBoard(f, ht.HfileBb)
 	for i := 0; i < 64; i++ {
 		f.Write([]byte("\tBITBOARD LOOKUP:"))
