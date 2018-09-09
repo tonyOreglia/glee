@@ -1,3 +1,5 @@
+// Package hashtables calculates various bitboard lookup tables
+// which provide data about specific locations on the chess board.
 package hashtables
 
 import (
@@ -64,7 +66,6 @@ func CalculateAllLookupBbs() *HashTables {
 	generateSingleBitLookup(hashTables)
 	generateArrayBitboardLookup(hashTables)
 	generateEnPassantBitboardLookup(hashTables)
-	printAllBitboards(hashTables)
 	return hashTables
 }
 
@@ -198,11 +199,8 @@ func generateArrayBitboardLookup(ht *HashTables) {
 		if index == 60 {
 			ht.LegalKingMovesBbHash[1][60] |= ht.SingleIndexBbHash[62] | ht.SingleIndexBbHash[58]
 		}
-
-		// PAWN MOVE
 		ht.LegalPawnMovesBbHash[0][index] = 0
 		ht.LegalPawnMovesBbHash[1][index] = 0
-
 		if index <= 56 {
 			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+7]
 		}
@@ -240,7 +238,8 @@ func generateArrayBitboardLookup(ht *HashTables) {
 	}
 }
 
-func printAllBitboards(ht *HashTables) {
+// PrintAllBitboards prints all hash lookups to a local file
+func PrintAllBitboards(ht *HashTables) {
 	f, _ := os.Create("hash-tables.txt")
 	defer f.Close()
 	f.Write([]byte("\tA FILE"))

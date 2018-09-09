@@ -25,11 +25,11 @@ func NewLegalMoves(pos *position.Position, ht *hashtables.HashTables) *LegalMove
 }
 
 func (mvs *LegalMoves) generateBishopMoves() {
-	bishopBbCopy := mvs.pos.GetActiveSidesBitboards().Bishops
+	bishopBbCopy, _ := bitboard.NewBitboard(mvs.pos.GetActiveSidesBitboards().Bishops.Value())
 	for bishopBbCopy.Value() != 0 {
 		bishopPosition := bishopBbCopy.Lsb()
 		bishopBbCopy.RemoveBit(bishopPosition)
-		validMovesBb := mvs.generateValidDiagonalSlidingMovesBb(bishopPosition)
+		validMovesBb := mvs.generateValidDiagonalSlidingMovesBb(bishopPosition).Value()
 		validMovesBb &= ^mvs.pos.ActiveSideOccupiedSqsBb()
 		mvs.addValidMovesToArray(bishopPosition, validMovesBb)
 	}
@@ -37,21 +37,27 @@ func (mvs *LegalMoves) generateBishopMoves() {
 
 // AddValidMovesToArray save subset of valid moves from current position
 func (mvs *LegalMoves) addValidMovesToArray(index int, validMovesBb uint64) {
-
+	mvs.moves = append(mvs.moves, [2]int{index})
 }
 
-func (mvs *LegalMoves) generateValidDiagonalSlidingMovesBb(index int) uint64 {
-	return mvs.generateValidDirectionalMovesBb(index, mvs.ht.NorthEastArrayBbHash) |
-		mvs.generateValidDirectionalMovesBb(index, mvs.ht.NorthWestArrayBbHash) |
-		mvs.generateValidDirectionalMovesBb(index, mvs.ht.SouthEastArrayBbHash) |
-		mvs.generateValidDirectionalMovesBb(index, mvs.ht.SouthEastArrayBbHash)
+func (mvs *LegalMoves) generateValidDiagonalSlidingMovesBb(index int) *bitboard.Bitboard {
+	occSqsBb := mvs.pos.AllOccupiedSqsBb()
+	validDiagonalMoves, _ := bitboard.NewBitboard(
+		generateValidDirectionalMovesBb(index, mvs.ht.NorthEastArrayBbHash, occSqsBb).Value() |
+			generateValidDirectionalMovesBb(index, mvs.ht.NorthWestArrayBbHash, occSqsBb).Value() |
+			generateValidDirectionalMovesBb(index, mvs.ht.SouthEastArrayBbHash, occSqsBb).Value() |
+			generateValidDirectionalMovesBb(index, mvs.ht.SouthEastArrayBbHash, occSqsBb).Value())
+	return validDiagonalMoves
 }
 
-func (mvs *LegalMoves) generateValidDirectionalMovesBb(index int, directionalHash [64]uint64) uint64 {
-	occupiedSqsOverlapsNEastArrayBb, _ := bitboard.NewBitboard(mvs.pos.AllOccupiedSqsBb() & directionalHash[index])
+func generateValidDirectionalMovesBb(index int, directionalHash [64]uint64, occupiedSqsBb uint64) *bitboard.Bitboard {
+	var validDirectionalMoves *bitboard.Bitboard
+	occupiedSqsOverlapsNEastArrayBb, _ := bitboard.NewBitboard(occupiedSqsBb & directionalHash[index])
 	if occupiedSqsOverlapsNEastArrayBb.Value() != 0 {
 		msb := occupiedSqsOverlapsNEastArrayBb.Msb()
-		return directionalHash[index] ^ directionalHash[msb]
+		validDirectionalMoves, _ = bitboard.NewBitboard(directionalHash[index] ^ directionalHash[msb])
+		return validDirectionalMoves
 	}
-	return directionalHash[index]
+	validDirectionalMoves, _ = bitboard.NewBitboard(directionalHash[index])
+	return validDirectionalMoves
 }

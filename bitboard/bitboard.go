@@ -22,6 +22,10 @@ func (b *Bitboard) Set(bb uint64) error {
 	return nil
 }
 
+func (b *Bitboard) Combine(bb *Bitboard) {
+	b.bitboard |= bb.Value()
+}
+
 func (b *Bitboard) SetBit(bit int) error {
 	b.bitboard |= 1 << uint(bit)
 	return nil
