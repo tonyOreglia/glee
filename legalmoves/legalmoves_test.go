@@ -1,12 +1,10 @@
 package legalmoves
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/tonyoreglia/glee/bitboard"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/tonyoreglia/glee/bitboard"
 	"github.com/tonyoreglia/glee/hashtables"
 	"github.com/tonyoreglia/glee/position"
 )
@@ -29,8 +27,13 @@ func TestGenerateBishopMovesBb(t *testing.T) {
 	mvs := NewLegalMoves(pos, ht)
 	mvs.generateBishopMoves()
 	expectedMvs := [][2]int{{63, 0}, {63, 9}, {63, 18}, {63, 27}, {63, 36}, {63, 45}, {63, 54}}
-	fmt.Print("moves: ", mvs.moves)
 	assert.Equal(t, expectedMvs, mvs.moves)
+
+	// should be zero legal Bishop moves from starting position
+	pos, _ = position.NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	mvs = NewLegalMoves(pos, ht)
+	mvs.generateBishopMoves()
+	assert.Equal(t, 0, len(mvs.moves))
 }
 
 func TestGenerateValidDirectionalMovesBb(t *testing.T) {
