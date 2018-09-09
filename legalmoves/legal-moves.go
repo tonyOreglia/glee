@@ -85,21 +85,17 @@ func generateSlidingMovesBb(index int, occSqsBb uint64, ht *hashtables.HashTable
 }
 
 func generateValidDiagonalSlidingMovesBb(index int, occSqsBb uint64, ht *hashtables.HashTables) *bitboard.Bitboard {
-	validDiagonalMoves, _ := bitboard.NewBitboard(
-		generateValidDirectionalMovesBb(index, ht.NorthEastArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, ht.NorthWestArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, ht.SouthEastArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, ht.SouthEastArrayBbHash, occSqsBb).Value())
-	return validDiagonalMoves
+	return generateValidDirectionalMovesBb(index, ht.NorthEastArrayBbHash, occSqsBb).Combine(
+		generateValidDirectionalMovesBb(index, ht.NorthWestArrayBbHash, occSqsBb).Combine(
+			generateValidDirectionalMovesBb(index, ht.SouthEastArrayBbHash, occSqsBb).Combine(
+				generateValidDirectionalMovesBb(index, ht.SouthEastArrayBbHash, occSqsBb))))
 }
 
 func generateValidStraightSlidingMovesBb(index int, occSqsBb uint64, ht *hashtables.HashTables) *bitboard.Bitboard {
-	validStraightMoves, _ := bitboard.NewBitboard(
-		generateValidDirectionalMovesBb(index, ht.NorthArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, ht.SouthArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, ht.EastArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, ht.WestArrayBbHash, occSqsBb).Value())
-	return validStraightMoves
+	return generateValidDirectionalMovesBb(index, ht.NorthArrayBbHash, occSqsBb).Combine(
+		generateValidDirectionalMovesBb(index, ht.SouthArrayBbHash, occSqsBb).Combine(
+			generateValidDirectionalMovesBb(index, ht.EastArrayBbHash, occSqsBb).Combine(
+				generateValidDirectionalMovesBb(index, ht.WestArrayBbHash, occSqsBb))))
 }
 
 func generateValidDirectionalMovesBb(index int, directionalHash [64]uint64, occupiedSqsBb uint64) *bitboard.Bitboard {

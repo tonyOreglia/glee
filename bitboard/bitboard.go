@@ -31,8 +31,9 @@ func (b *Bitboard) Set(bb uint64) error {
 	return nil
 }
 
-func (b *Bitboard) Combine(bb *Bitboard) {
+func (b *Bitboard) Combine(bb *Bitboard) *Bitboard {
 	b.bitboard |= bb.Value()
+	return b
 }
 
 func (b *Bitboard) RemoveOverlappingBits(bb *Bitboard) {
