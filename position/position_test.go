@@ -36,10 +36,15 @@ func TestTokenizeFen(t *testing.T) {
 func TestPositionContructorFen(t *testing.T) {
 	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 	assert.Equal(t, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", position.GetFenString())
+
 	position, _ = NewPositionFen("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b q e3 1 2")
 	assert.Equal(t, "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b q e3 1 2", position.GetFenString())
+
 	position, _ = NewPositionFen("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b - - 1 2")
 	assert.Equal(t, "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b - - 1 2", position.GetFenString())
+
+	position, _ = NewPositionFen("7k/8/8/8/8/8/8/6KB w KQkq - 0 1")
+	assert.Equal(t, "7k/8/8/8/8/8/8/6KB w KQkq - 0 1", position.GetFenString())
 }
 
 func TestPositionUpdate(t *testing.T) {

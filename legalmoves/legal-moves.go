@@ -29,24 +29,28 @@ func (mvs *LegalMoves) generateBishopMoves() {
 	for bishopBbCopy.Value() != 0 {
 		bishopPosition := bishopBbCopy.Lsb()
 		bishopBbCopy.RemoveBit(bishopPosition)
-		validMovesBb := mvs.generateValidDiagonalSlidingMovesBb(bishopPosition).Value()
-		validMovesBb &= ^mvs.pos.ActiveSideOccupiedSqsBb()
+		validMovesBb := generateValidDiagonalSlidingMovesBb(bishopPosition, mvs.pos.AllOccupiedSqsBb(), mvs.ht)
+		validMovesBb.Set(validMovesBb.Value() & ^mvs.pos.ActiveSideOccupiedSqsBb())
 		mvs.addValidMovesToArray(bishopPosition, validMovesBb)
 	}
 }
 
 // AddValidMovesToArray save subset of valid moves from current position
-func (mvs *LegalMoves) addValidMovesToArray(index int, validMovesBb uint64) {
-	mvs.moves = append(mvs.moves, [2]int{index})
+func (mvs *LegalMoves) addValidMovesToArray(index int, validMovesBb *bitboard.Bitboard) {
+	var validMove int
+	for validMovesBb.Value() != 0 {
+		validMove = validMovesBb.Lsb()
+		validMovesBb.RemoveBit(validMove)
+		mvs.moves = append(mvs.moves, [2]int{index, validMove})
+	}
 }
 
-func (mvs *LegalMoves) generateValidDiagonalSlidingMovesBb(index int) *bitboard.Bitboard {
-	occSqsBb := mvs.pos.AllOccupiedSqsBb()
+func generateValidDiagonalSlidingMovesBb(index int, occSqsBb uint64, ht *hashtables.HashTables) *bitboard.Bitboard {
 	validDiagonalMoves, _ := bitboard.NewBitboard(
-		generateValidDirectionalMovesBb(index, mvs.ht.NorthEastArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, mvs.ht.NorthWestArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, mvs.ht.SouthEastArrayBbHash, occSqsBb).Value() |
-			generateValidDirectionalMovesBb(index, mvs.ht.SouthEastArrayBbHash, occSqsBb).Value())
+		generateValidDirectionalMovesBb(index, ht.NorthEastArrayBbHash, occSqsBb).Value() |
+			generateValidDirectionalMovesBb(index, ht.NorthWestArrayBbHash, occSqsBb).Value() |
+			generateValidDirectionalMovesBb(index, ht.SouthEastArrayBbHash, occSqsBb).Value() |
+			generateValidDirectionalMovesBb(index, ht.SouthEastArrayBbHash, occSqsBb).Value())
 	return validDiagonalMoves
 }
 

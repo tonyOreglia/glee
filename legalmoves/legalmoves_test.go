@@ -1,10 +1,14 @@
 package legalmoves
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/tonyoreglia/glee/bitboard"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tonyoreglia/glee/hashtables"
+	"github.com/tonyoreglia/glee/position"
 )
 
 // func TestGenerateLegalMoves(t *testing.T) {
@@ -19,9 +23,18 @@ import (
 
 var ht = hashtables.CalculateAllLookupBbs()
 
+func TestGenerateBishopMovesBb(t *testing.T) {
+	// Legal white bishop moves from h1 unblocked
+	pos, _ := position.NewPositionFen("7k/8/8/8/8/8/8/6KB w KQkq - 0 1")
+	mvs := NewLegalMoves(pos, ht)
+	mvs.generateBishopMoves()
+	expectedMvs := [][2]int{{63, 0}, {63, 9}, {63, 18}, {63, 27}, {63, 36}, {63, 45}, {63, 54}}
+	fmt.Print("moves: ", mvs.moves)
+	assert.Equal(t, expectedMvs, mvs.moves)
+}
+
 func TestGenerateValidDirectionalMovesBb(t *testing.T) {
 	// piece sliding southwest from h8 unblocked
-	ht := hashtables.CalculateAllLookupBbs()
 	sw := ht.SouthWestArrayBbHash
 	index := 7
 	validMvsBb := generateValidDirectionalMovesBb(index, sw, uint64(0))
@@ -35,5 +48,22 @@ func TestGenerateValidDirectionalMovesBb(t *testing.T) {
 	validMvsBb = generateValidDirectionalMovesBb(index, north, uint64(0x100))
 	validMvsBb.Print()
 	expectedValidMvsBb = uint64(0x101010100)
+	assert.Equal(t, expectedValidMvsBb, validMvsBb.Value())
+}
+
+func TestGenerateValidDiagonalSlidingMovesBb(t *testing.T) {
+	// piece sliding diagonally from e4 unblocked
+	index := 36
+	occSqsVal := uint64(0)
+	validMvsBb := generateValidDiagonalSlidingMovesBb(index, occSqsVal, ht)
+	expectedValidMvsBb := uint64(0x8040200028448201)
+	assert.Equal(t, expectedValidMvsBb, validMvsBb.Value())
+
+	// piece sliding diagonally from a3 blocked at c5
+	index = 40
+	occSqsBb, _ := bitboard.NewBitboard(0)
+	occSqsBb.SetBit(26)
+	validMvsBb = generateValidDiagonalSlidingMovesBb(index, occSqsBb.Value(), ht)
+	expectedValidMvsBb = uint64(0x402000204000000)
 	assert.Equal(t, expectedValidMvsBb, validMvsBb.Value())
 }
