@@ -32,7 +32,7 @@ func (mvs *LegalMoves) generateLegalMovesForSinglePiece(
 	for pieceLocationBbCopy.Value() != 0 {
 		piecePosition := pieceLocationBbCopy.Lsb()
 		pieceLocationBbCopy.RemoveBit(piecePosition)
-		validMovesBb := genValidMovesFn(piecePosition, mvs.pos.AllOccupiedSqsBb(), mvs.ht)
+		validMovesBb := genValidMovesFn(piecePosition, mvs.pos.AllOccupiedSqsBb().Value(), mvs.ht)
 		// can't move to square occupied by your own pieces
 		validMovesBb.RemoveOverlappingBits(mvs.pos.ActiveSideOccupiedSqsBb())
 		mvs.addValidMovesToArray(piecePosition, validMovesBb)
@@ -56,7 +56,53 @@ func (mvs *LegalMoves) generateKnightMoves() {
 }
 
 func (mvs *LegalMoves) generateKingMoves() {
-	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards().King.Value(), mvs.getKingMovesBb)
+	piecePosition := mvs.pos.GetActiveSidesBitboards().King.Lsb()
+	validMovesBb := mvs.getKingMovesBb(piecePosition, mvs.pos.AllOccupiedSqsBb().Value(), mvs.ht)
+	validMovesBb.RemoveOverlappingBits(mvs.pos.ActiveSideOccupiedSqsBb())
+	validMovesBb.RemoveOverlappingBits(mvs.pos.GetActiveSideCastlingRightsBb())
+	mvs.addValidMovesToArray(piecePosition, validMovesBb)
+}
+
+// Positive 1 shift direction for white, negative 1 for black.
+func (mvs *LegalMoves) generatePawnMoves() {
+	var getShiftedBb func(*bitboard.Bitboard, uint) *bitboard.Bitboard
+	var directionOfMovement int
+	if mvs.pos.GetActiveSide() == position.White {
+		getShiftedBb = bitboard.GetShiftedRightBb
+		directionOfMovement = 1
+	} else {
+		getShiftedBb = bitboard.GetShiftedLeftBb
+		directionOfMovement = -1
+	}
+
+	pawnPosBb := mvs.pos.GetActiveSidesBitboards().Pawns
+	hFileBb, _ := bitboard.NewBitboard(mvs.ht.HfileBb)
+	aFileBb, _ := bitboard.NewBitboard(mvs.ht.AfileBb)
+
+	pawnAttackBb := getShiftedBb(&pawnPosBb, 9)
+	pawnAttackBb.RemoveOverlappingBits(hFileBb).BitwiseAnd(mvs.pos.InactiveSideOccupiedSqsBb())
+	mvs.addPawnMovesToArray(9, directionOfMovement, pawnAttackBb)
+
+	pawnAttackBb = getShiftedBb(&pawnPosBb, 7)
+	pawnAttackBb.RemoveOverlappingBits(aFileBb).BitwiseAnd(mvs.pos.InactiveSideOccupiedSqsBb())
+	mvs.addPawnMovesToArray(7, directionOfMovement, pawnAttackBb)
+
+	pawnPushBb := getShiftedBb(&pawnPosBb, 8)
+	pawnPushBb.RemoveOverlappingBits(mvs.pos.AllOccupiedSqsBb())
+	doubleRankpawnPushBb := getShiftedBb(pawnPushBb, 8)
+	mvs.addPawnMovesToArray(8, directionOfMovement, pawnPushBb)
+	doubleRankpawnPushBb.RemoveOverlappingBits(mvs.pos.AllOccupiedSqsBb())
+	mvs.addPawnMovesToArray(16, directionOfMovement, doubleRankpawnPushBb)
+}
+
+func (mvs *LegalMoves) addPawnMovesToArray(shift int, shiftDirection int, pawnPushBb *bitboard.Bitboard) {
+	shift = shift * shiftDirection
+	for pawnPushBb.Value() != 0 {
+		dest := pawnPushBb.Lsb()
+		pawnPushBb.RemoveBit(dest)
+		origin := dest + shift
+		mvs.moves = append(mvs.moves, [2]int{origin, dest})
+	}
 }
 
 // AddValidMovesToArray save subset of valid moves from current position

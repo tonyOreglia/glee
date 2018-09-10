@@ -10,17 +10,17 @@ import (
 	"github.com/tonyoreglia/glee/position"
 )
 
-// func TestGenerateLegalMoves(t *testing.T) {
-// 	ht := hashtables.CalculateAllLookupBbs()
-// 	pos, _ := position.NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-// 	moves := NewLegalMoves(pos, ht)
-// 	var expectedLegalMoves [][2]int
-// 	expectedLegalMoves = make([][2]int, 0, 100)
-// 	expectedLegalMoves = append(expectedLegalMoves, [2]int{1, 2})
-// 	assert.Equal(t, expectedLegalMoves, moves)
-// }
-
 var ht = hashtables.CalculateAllLookupBbs()
+
+func TestGeneratePawnMoves(t *testing.T) {
+	pos, _ := position.NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	mvs := NewLegalMoves(pos, ht)
+	mvs.generatePawnMoves()
+	fmt.Print(mvs.moves)
+	bb := bitboard.NewBbFromMovesSlice(mvs.moves)
+	bb.Print()
+	assert.Equal(t, 16, len(mvs.moves))
+}
 
 func TestGenerateKingMovesBb(t *testing.T) {
 	// should be zero legal king moves from starting position
@@ -47,6 +47,16 @@ func TestGenerateKingMovesBb(t *testing.T) {
 	bb = bitboard.NewBbFromMovesSlice(mvs.moves)
 	bb.Print()
 	expectedMvs = [][2]int{{60, 61}, {60, 62}}
+	assert.ElementsMatch(t, expectedMvs, mvs.moves)
+
+	// king side castling
+	pos, _ = position.NewPositionFen("7k/8/8/8/8/8/PPPPPPPP/3QK3 w - - 0 1")
+	mvs = NewLegalMoves(pos, ht)
+	mvs.generateKingMoves()
+	fmt.Print(mvs.moves)
+	bb = bitboard.NewBbFromMovesSlice(mvs.moves)
+	bb.Print()
+	expectedMvs = [][2]int{{60, 61}}
 	assert.ElementsMatch(t, expectedMvs, mvs.moves)
 }
 

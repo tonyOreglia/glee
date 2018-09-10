@@ -36,8 +36,24 @@ func (b *Bitboard) Combine(bb *Bitboard) *Bitboard {
 	return b
 }
 
-func (b *Bitboard) RemoveOverlappingBits(bb *Bitboard) {
+func ReturnCombined(bb *Bitboard, bb2 *Bitboard) *Bitboard {
+	combinedBb, _ := NewBitboard(bb.Value() | bb2.Value())
+	return combinedBb
+}
+
+func (b *Bitboard) BitwiseAnd(bb *Bitboard) *Bitboard {
+	b.bitboard &= bb.bitboard
+	return b
+}
+
+func ReturnOverlapBb(bb1 *Bitboard, bb2 *Bitboard) *Bitboard {
+	overlapBb, _ := NewBitboard(bb1.Value() & bb2.Value())
+	return overlapBb
+}
+
+func (b *Bitboard) RemoveOverlappingBits(bb *Bitboard) *Bitboard {
 	b.bitboard &^= bb.Value()
+	return b
 }
 
 func (b *Bitboard) SetBit(bit int) error {
@@ -45,15 +61,28 @@ func (b *Bitboard) SetBit(bit int) error {
 	return nil
 }
 
-func (b *Bitboard) IsBitSet(bit int) bool {
-	if ((uint64(1) << uint(bit)) & b.bitboard) != uint64(0) {
-		return true
-	}
-	return false
+func GetShiftedLeftBb(b *Bitboard, shift uint) *Bitboard {
+	shiftedBb := new(Bitboard)
+	shiftedBb.Set(b.bitboard << shift)
+	return shiftedBb
+}
+
+func GetShiftedRightBb(b *Bitboard, shift uint) *Bitboard {
+	shiftedBb := new(Bitboard)
+	shiftedBb.Set(b.bitboard >> shift)
+	return shiftedBb
+}
+
+func (b *Bitboard) BitIsSet(bit int) bool {
+	return ((uint64(1) << uint(bit)) & b.bitboard) != uint64(0)
+}
+
+func (b *Bitboard) BitIsNotSet(bit int) bool {
+	return !b.BitIsSet(bit)
 }
 
 func (b *Bitboard) GetBitValue(bit int) uint {
-	if b.IsBitSet(bit) {
+	if b.BitIsSet(bit) {
 		return 1
 	}
 	return 0
@@ -84,7 +113,7 @@ func (b *Bitboard) Print() {
 	fmt.Println("")
 	for i = 0; i < 64; i++ {
 		var sq int
-		if b.IsBitSet(i) {
+		if b.BitIsSet(i) {
 			sq = 1
 		}
 		fmt.Print(sq)

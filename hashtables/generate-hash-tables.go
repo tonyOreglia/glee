@@ -201,41 +201,41 @@ func generateArrayBitboardLookup(ht *HashTables) {
 		if index == 60 {
 			ht.LegalKingMovesBbHash[0][60] |= ht.SingleIndexBbHash[62] | ht.SingleIndexBbHash[58]
 		}
-		ht.LegalPawnMovesBbHash[0][index] = 0
 		ht.LegalPawnMovesBbHash[1][index] = 0
+		ht.LegalPawnMovesBbHash[0][index] = 0
 		if index <= 56 {
-			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+7]
+			ht.LegalPawnMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+7]
 		}
 		if index <= 55 {
-			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+8]
+			ht.LegalPawnMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+8]
 		}
 		if index <= 54 {
-			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+9]
+			ht.LegalPawnMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+9]
 		}
 		if index >= 7 {
-			ht.LegalPawnMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-7]
+			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index-7]
 		}
 		if index >= 8 {
-			ht.LegalPawnMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-8]
+			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index-8]
 		}
 		if index >= 9 {
-			ht.LegalPawnMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-9]
+			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index-9]
 		}
 
 		if index > 7 && index < 16 {
-			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index+16]
+			ht.LegalPawnMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+16]
 		}
 		if index > 47 && index < 56 {
-			ht.LegalPawnMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-16]
+			ht.LegalPawnMovesBbHash[0][index] |= ht.SingleIndexBbHash[index-16]
 		}
 		if ht.SingleIndexBbHash[index]&ht.AfileBb != 0 {
-			ht.LegalPawnMovesBbHash[0][index] &= ^ht.HfileBb
 			ht.LegalPawnMovesBbHash[1][index] &= ^ht.HfileBb
+			ht.LegalPawnMovesBbHash[0][index] &= ^ht.HfileBb
 
 		}
 		if ht.SingleIndexBbHash[index]&ht.HfileBb != 0 {
-			ht.LegalPawnMovesBbHash[0][index] &= ^ht.AfileBb
 			ht.LegalPawnMovesBbHash[1][index] &= ^ht.AfileBb
+			ht.LegalPawnMovesBbHash[0][index] &= ^ht.AfileBb
 		}
 	}
 }
