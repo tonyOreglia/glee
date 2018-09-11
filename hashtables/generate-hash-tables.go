@@ -22,6 +22,8 @@ type HashTables struct {
 	HfileBb                             uint64
 	FourthRankBb                        uint64
 	FifthRankBb                         uint64
+	FirstRankBb                         uint64
+	EighthRankBb                        uint64
 	SingleIndexBbHash                   [64]uint64
 	EnPassantBbHash                     [64]uint64
 	AttackedEnPassantPawnLocationBbHash [64]uint64
@@ -50,6 +52,8 @@ func CalculateAllLookupBbs() *HashTables {
 	hashTables.HfileBb = hashTables.AfileBb << 7
 	hashTables.FourthRankBb = 0xFF00000000
 	hashTables.FifthRankBb = 0xFF000000
+	hashTables.FirstRankBb = 0xFF00000000000000
+	hashTables.EighthRankBb = 0xFF
 
 	for index := 0; index < 64; index++ {
 		hashTables.EnPassantBbHash[index] = uint64(0)

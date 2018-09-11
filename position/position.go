@@ -23,6 +23,7 @@ const WhiteQueenSideCastlingRightsBit = 58
 const BlackKingSideCastlingRightsBit = 6
 const BlackQueenSideCastlingRightsBit = 2
 
+// may need to make this an array of bitboards whose index's are constants named by piece
 type bitboards struct {
 	OccupiedSqs, King, Queen, Bishops, Knights, Rooks, Pawns bitboard.Bitboard
 }

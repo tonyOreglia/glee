@@ -63,16 +63,18 @@ func (mvs *LegalMoves) generateKingMoves() {
 	mvs.addValidMovesToArray(piecePosition, validMovesBb)
 }
 
-// Positive 1 shift direction for white, negative 1 for black.
 func (mvs *LegalMoves) generatePawnMoves() {
 	var getShiftedBb func(*bitboard.Bitboard, uint) *bitboard.Bitboard
 	var directionOfMovement int
+	var promotionRank *bitboard.Bitboard
 	if mvs.pos.GetActiveSide() == position.White {
 		getShiftedBb = bitboard.GetShiftedRightBb
 		directionOfMovement = 1
+		promotionRank, _ = bitboard.NewBitboard(mvs.ht.EighthRankBb)
 	} else {
 		getShiftedBb = bitboard.GetShiftedLeftBb
 		directionOfMovement = -1
+		promotionRank, _ = bitboard.NewBitboard(mvs.ht.FirstRankBb)
 	}
 
 	pawnPosBb := mvs.pos.GetActiveSidesBitboards().Pawns

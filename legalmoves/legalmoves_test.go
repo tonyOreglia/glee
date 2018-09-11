@@ -20,6 +20,14 @@ func TestGeneratePawnMoves(t *testing.T) {
 	bb := bitboard.NewBbFromMovesSlice(mvs.moves)
 	bb.Print()
 	assert.Equal(t, 16, len(mvs.moves))
+
+	pos, _ = position.NewPositionFen("rnbqkbnr/pppppppp/8/8/8/7P/PPPPPPP1/RNBQKBNR b KQkq - 0 1")
+	mvs = NewLegalMoves(pos, ht)
+	mvs.generatePawnMoves()
+	fmt.Print(mvs.moves)
+	bb = bitboard.NewBbFromMovesSlice(mvs.moves)
+	bb.Print()
+	assert.Equal(t, 16, len(mvs.moves))
 }
 
 func TestGenerateKingMovesBb(t *testing.T) {
