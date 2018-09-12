@@ -23,15 +23,23 @@ const WhiteQueenSideCastlingRightsBit = 58
 const BlackKingSideCastlingRightsBit = 6
 const BlackQueenSideCastlingRightsBit = 2
 
+const OccupiedSqs = 0
+const King = 1
+const Queen = 2
+const Bishops = 3
+const Knights = 4
+const Rooks = 5
+const Pawns = 6
+
 // may need to make this an array of bitboards whose index's are constants named by piece
-type bitboards struct {
-	OccupiedSqs, King, Queen, Bishops, Knights, Rooks, Pawns bitboard.Bitboard
-}
+// type bitboards struct {
+// 	OccupiedSqs, King, Queen, Bishops, Knights, Rooks, Pawns bitboard.Bitboard
+// }
 
 // Position struct represents a static chess position
 type Position struct {
-	bitboards      [2]bitboards
-	castlingRights [2]bitboard.Bitboard
+	bitboards      [2][]bitboard.Bitboard
+	castlingRights []bitboard.Bitboard
 	activeSide     int
 	enPassanteSq   int
 	moveCt         int
@@ -41,6 +49,9 @@ type Position struct {
 // NewPositionFen constructs Position struct instance from Forth-Edwards Notation string
 func NewPositionFen(fen string) (*Position, error) {
 	p := new(Position)
+	p.bitboards[0] = make([]bitboard.Bitboard, 7)
+	p.bitboards[1] = make([]bitboard.Bitboard, 7)
+	p.castlingRights = make([]bitboard.Bitboard, 2)
 	Position, activeSide, castlingRights, enPassanteSq, moveCount, halfMoveCount := getFenStringTokens(fen)
 	p.setBitboardsFromFen(Position, activeSide)
 	p.setActiveSide(activeSide)
@@ -53,19 +64,19 @@ func NewPositionFen(fen string) (*Position, error) {
 
 // AllOccupiedSqsBb returns bitboard representing which squares havea piece
 func (p *Position) AllOccupiedSqsBb() *bitboard.Bitboard {
-	return bitboard.ReturnCombined(&p.bitboards[White].OccupiedSqs, &p.bitboards[Black].OccupiedSqs)
+	return bitboard.ReturnCombined(&p.bitboards[White][OccupiedSqs], &p.bitboards[Black][OccupiedSqs])
 }
 
 // ActiveSideOccupiedSqsBb returns bitboard representing which squares the active side occupies
 func (p *Position) ActiveSideOccupiedSqsBb() *bitboard.Bitboard {
-	return &p.bitboards[p.activeSide].OccupiedSqs
+	return &p.bitboards[p.activeSide][OccupiedSqs]
 }
 
 func (p *Position) InactiveSideOccupiedSqsBb() *bitboard.Bitboard {
 	if p.activeSide == White {
-		return &p.bitboards[Black].OccupiedSqs
+		return &p.bitboards[Black][OccupiedSqs]
 	}
-	return &p.bitboards[White].OccupiedSqs
+	return &p.bitboards[White][OccupiedSqs]
 }
 
 // GetActiveSide returns the currently active side
@@ -78,8 +89,8 @@ func (p *Position) GetActiveSideCastlingRightsBb() *bitboard.Bitboard {
 }
 
 // GetActiveSidesBitboards returns the position bitboards for the currently active side
-func (p *Position) GetActiveSidesBitboards() *bitboards {
-	return &p.bitboards[p.activeSide]
+func (p *Position) GetActiveSidesBitboards() []bitboard.Bitboard {
+	return p.bitboards[p.activeSide]
 }
 
 // MakeMove updates position with single chess move
@@ -105,24 +116,24 @@ func (p *Position) switchActiveSide() {
 
 func (p *Position) updateBbsSingleMove(origin int, terminus int, activeSide int) {
 	switch {
-	case p.bitboards[activeSide].Pawns.BitIsSet(origin):
-		p.bitboards[activeSide].Pawns.SetBit(terminus)
-		p.bitboards[activeSide].Pawns.RemoveBit(origin)
-	case p.bitboards[activeSide].Rooks.BitIsSet(origin):
-		p.bitboards[activeSide].Rooks.SetBit(terminus)
-		p.bitboards[activeSide].Rooks.RemoveBit(origin)
-	case p.bitboards[activeSide].Knights.BitIsSet(origin):
-		p.bitboards[activeSide].Knights.SetBit(terminus)
-		p.bitboards[activeSide].Knights.RemoveBit(origin)
-	case p.bitboards[activeSide].Bishops.BitIsSet(origin):
-		p.bitboards[activeSide].Bishops.SetBit(terminus)
-		p.bitboards[activeSide].Bishops.RemoveBit(origin)
-	case p.bitboards[activeSide].Queen.BitIsSet(origin):
-		p.bitboards[activeSide].Queen.SetBit(terminus)
-		p.bitboards[activeSide].Queen.RemoveBit(origin)
-	case p.bitboards[activeSide].King.BitIsSet(origin):
-		p.bitboards[activeSide].King.SetBit(terminus)
-		p.bitboards[activeSide].King.RemoveBit(origin)
+	case p.bitboards[activeSide][Pawns].BitIsSet(origin):
+		p.bitboards[activeSide][Pawns].SetBit(terminus)
+		p.bitboards[activeSide][Pawns].RemoveBit(origin)
+	case p.bitboards[activeSide][Rooks].BitIsSet(origin):
+		p.bitboards[activeSide][Rooks].SetBit(terminus)
+		p.bitboards[activeSide][Rooks].RemoveBit(origin)
+	case p.bitboards[activeSide][Knights].BitIsSet(origin):
+		p.bitboards[activeSide][Knights].SetBit(terminus)
+		p.bitboards[activeSide][Knights].RemoveBit(origin)
+	case p.bitboards[activeSide][Bishops].BitIsSet(origin):
+		p.bitboards[activeSide][Bishops].SetBit(terminus)
+		p.bitboards[activeSide][Bishops].RemoveBit(origin)
+	case p.bitboards[activeSide][Queen].BitIsSet(origin):
+		p.bitboards[activeSide][Queen].SetBit(terminus)
+		p.bitboards[activeSide][Queen].RemoveBit(origin)
+	case p.bitboards[activeSide][King].BitIsSet(origin):
+		p.bitboards[activeSide][King].SetBit(terminus)
+		p.bitboards[activeSide][King].RemoveBit(origin)
 	}
 	p.updatedOccupiedSqBitboard(activeSide)
 }
@@ -208,29 +219,29 @@ func (p *Position) setBitboardsFromFen(fenPosition string, activeSide int) {
 		letter := string(fenPosition[fenStringIndex])
 		switch letter {
 		case "p":
-			p.bitboards[Black].Pawns.SetBit(boardIndex)
+			p.bitboards[Black][Pawns].SetBit(boardIndex)
 		case "r":
-			p.bitboards[Black].Rooks.SetBit(boardIndex)
+			p.bitboards[Black][Rooks].SetBit(boardIndex)
 		case "n":
-			p.bitboards[Black].Knights.SetBit(boardIndex)
+			p.bitboards[Black][Knights].SetBit(boardIndex)
 		case "b":
-			p.bitboards[Black].Bishops.SetBit(boardIndex)
+			p.bitboards[Black][Bishops].SetBit(boardIndex)
 		case "q":
-			p.bitboards[Black].Queen.SetBit(boardIndex)
+			p.bitboards[Black][Queen].SetBit(boardIndex)
 		case "k":
-			p.bitboards[Black].King.SetBit(boardIndex)
+			p.bitboards[Black][King].SetBit(boardIndex)
 		case "P":
-			p.bitboards[White].Pawns.SetBit(boardIndex)
+			p.bitboards[White][Pawns].SetBit(boardIndex)
 		case "R":
-			p.bitboards[White].Rooks.SetBit(boardIndex)
+			p.bitboards[White][Rooks].SetBit(boardIndex)
 		case "N":
-			p.bitboards[White].Knights.SetBit(boardIndex)
+			p.bitboards[White][Knights].SetBit(boardIndex)
 		case "B":
-			p.bitboards[White].Bishops.SetBit(boardIndex)
+			p.bitboards[White][Bishops].SetBit(boardIndex)
 		case "Q":
-			p.bitboards[White].Queen.SetBit(boardIndex)
+			p.bitboards[White][Queen].SetBit(boardIndex)
 		case "K":
-			p.bitboards[White].King.SetBit(boardIndex)
+			p.bitboards[White][King].SetBit(boardIndex)
 		case "/":
 			boardIndex--
 		case "1":
@@ -370,76 +381,76 @@ func (p *Position) PrintBitboards() {
 			fmt.Println(":::::Black::::")
 		}
 		fmt.Println("Occupied Squares")
-		p.bitboards[i].OccupiedSqs.Print()
+		p.bitboards[i][OccupiedSqs].Print()
 		fmt.Println("Pawns")
-		p.bitboards[i].Pawns.Print()
+		p.bitboards[i][Pawns].Print()
 		fmt.Println("Rooks")
-		p.bitboards[i].Rooks.Print()
+		p.bitboards[i][Rooks].Print()
 		fmt.Println("Knights")
-		p.bitboards[i].Knights.Print()
+		p.bitboards[i][Knights].Print()
 		fmt.Println("Bishops")
-		p.bitboards[i].Bishops.Print()
+		p.bitboards[i][Bishops].Print()
 		fmt.Println("Queen")
-		p.bitboards[i].Queen.Print()
+		p.bitboards[i][Queen].Print()
 		fmt.Println("King")
-		p.bitboards[i].King.Print()
+		p.bitboards[i][King].Print()
 	}
 
 }
 
 func (p *Position) updatedOccupiedSqBitboard(activeSide int) {
-	p.bitboards[activeSide].OccupiedSqs.Set(
-		p.bitboards[activeSide].Pawns.Value() |
-			p.bitboards[activeSide].Rooks.Value() |
-			p.bitboards[activeSide].Knights.Value() |
-			p.bitboards[activeSide].Bishops.Value() |
-			p.bitboards[activeSide].King.Value() |
-			p.bitboards[activeSide].Queen.Value())
+	p.bitboards[activeSide][OccupiedSqs].Set(
+		p.bitboards[activeSide][Pawns].Value() |
+			p.bitboards[activeSide][Rooks].Value() |
+			p.bitboards[activeSide][Knights].Value() |
+			p.bitboards[activeSide][Bishops].Value() |
+			p.bitboards[activeSide][King].Value() |
+			p.bitboards[activeSide][Queen].Value())
 }
 
-func convertSingleBbIndexToFen(i int, j int, fenString *string, emptySqs *int, bb [2]bitboards) {
+func convertSingleBbIndexToFen(i int, j int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
 	index := int(j*8 + i)
 	switch {
-	case bb[White].King.BitIsSet(index):
+	case bb[White][King].BitIsSet(index):
 		*fenString += "K"
 		*emptySqs = 0
-	case bb[White].Queen.BitIsSet(index):
+	case bb[White][Queen].BitIsSet(index):
 		*fenString += "Q"
 		*emptySqs = 0
-	case bb[White].Bishops.BitIsSet(index):
+	case bb[White][Bishops].BitIsSet(index):
 		*fenString += "B"
 		*emptySqs = 0
-	case bb[White].Rooks.BitIsSet(index):
+	case bb[White][Rooks].BitIsSet(index):
 		*fenString += "R"
 		*emptySqs = 0
-	case bb[White].Knights.BitIsSet(index):
+	case bb[White][Knights].BitIsSet(index):
 		*fenString += "N"
 		*emptySqs = 0
-	case bb[White].Pawns.BitIsSet(index):
+	case bb[White][Pawns].BitIsSet(index):
 		*fenString += "P"
 		*emptySqs = 0
-	case bb[Black].King.BitIsSet(index):
+	case bb[Black][King].BitIsSet(index):
 		*fenString += "k"
 		*emptySqs = 0
-	case bb[Black].Queen.BitIsSet(index):
+	case bb[Black][Queen].BitIsSet(index):
 		*fenString += "q"
 		*emptySqs = 0
-	case bb[Black].Bishops.BitIsSet(index):
+	case bb[Black][Bishops].BitIsSet(index):
 		*fenString += "b"
 		*emptySqs = 0
-	case bb[Black].Rooks.BitIsSet(index):
+	case bb[Black][Rooks].BitIsSet(index):
 		*fenString += "r"
 		*emptySqs = 0
-	case bb[Black].Knights.BitIsSet(index):
+	case bb[Black][Knights].BitIsSet(index):
 		*fenString += "n"
 		*emptySqs = 0
-	case bb[Black].Pawns.BitIsSet(index):
+	case bb[Black][Pawns].BitIsSet(index):
 		*fenString += "p"
 		*emptySqs = 0
 	default:
 		*emptySqs++
-		nextWhiteSqOcc := bb[White].OccupiedSqs.BitIsSet(index + 1)
-		nexBlackSqOcc := bb[Black].OccupiedSqs.BitIsSet(index + 1)
+		nextWhiteSqOcc := bb[White][OccupiedSqs].BitIsSet(index + 1)
+		nexBlackSqOcc := bb[Black][OccupiedSqs].BitIsSet(index + 1)
 		nextSqOcc := nextWhiteSqOcc || nexBlackSqOcc
 		notHFile := i != 7
 		if nextSqOcc && notHFile {
@@ -448,11 +459,11 @@ func convertSingleBbIndexToFen(i int, j int, fenString *string, emptySqs *int, b
 	}
 }
 
-func convertSingleBbRowToFenString(rank int, fenString *string, emptySqs *int, bb [2]bitboards) {
+func convertSingleBbRowToFenString(rank int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
 	for file := int(0); file < 8; file++ {
 		convertSingleBbIndexToFen(file, rank, fenString, emptySqs, bb)
 	}
-	if !bb[White].OccupiedSqs.BitIsSet((rank+1)*8-1) && !bb[Black].OccupiedSqs.BitIsSet((rank+1)*8-1) {
+	if !bb[White][OccupiedSqs].BitIsSet((rank+1)*8-1) && !bb[Black][OccupiedSqs].BitIsSet((rank+1)*8-1) {
 		*fenString += strconv.Itoa(*emptySqs)
 	}
 	notFirstRank := rank != 7
@@ -462,7 +473,7 @@ func convertSingleBbRowToFenString(rank int, fenString *string, emptySqs *int, b
 	*emptySqs = 0
 }
 
-func convertBitboardsToFenString(bb [2]bitboards) string {
+func convertBitboardsToFenString(bb [2][]bitboard.Bitboard) string {
 	fenString := ""
 	emptySqs := 0
 	for rank := int(0); rank < 8; rank++ {

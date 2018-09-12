@@ -40,15 +40,15 @@ func (mvs *LegalMoves) generateLegalMovesForSinglePiece(
 }
 
 func (mvs *LegalMoves) generateBishopMoves() {
-	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards().Bishops.Value(), generateValidDiagonalSlidingMovesBb)
+	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards()[position.Bishops].Value(), generateValidDiagonalSlidingMovesBb)
 }
 
 func (mvs *LegalMoves) generateRookMoves() {
-	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards().Rooks.Value(), generateValidStraightSlidingMovesBb)
+	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards()[position.Rooks].Value(), generateValidStraightSlidingMovesBb)
 }
 
 func (mvs *LegalMoves) generateQueenMoves() {
-	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards().Queen.Value(), generateSlidingMovesBb)
+	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards()[position.Queen].Value(), generateSlidingMovesBb)
 }
 
 func (mvs *LegalMoves) generateKnightMoves() {
@@ -66,15 +66,15 @@ func (mvs *LegalMoves) generateKingMoves() {
 func (mvs *LegalMoves) generatePawnMoves() {
 	var getShiftedBb func(*bitboard.Bitboard, uint) *bitboard.Bitboard
 	var directionOfMovement int
-	var promotionRank *bitboard.Bitboard
+	// var promotionRank *bitboard.Bitboard
 	if mvs.pos.GetActiveSide() == position.White {
 		getShiftedBb = bitboard.GetShiftedRightBb
 		directionOfMovement = 1
-		promotionRank, _ = bitboard.NewBitboard(mvs.ht.EighthRankBb)
+		// promotionRank, _ = bitboard.NewBitboard(mvs.ht.EighthRankBb)
 	} else {
 		getShiftedBb = bitboard.GetShiftedLeftBb
 		directionOfMovement = -1
-		promotionRank, _ = bitboard.NewBitboard(mvs.ht.FirstRankBb)
+		// promotionRank, _ = bitboard.NewBitboard(mvs.ht.FirstRankBb)
 	}
 
 	pawnPosBb := mvs.pos.GetActiveSidesBitboards().Pawns
