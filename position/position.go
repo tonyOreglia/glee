@@ -1,5 +1,5 @@
 // Package position leverages the bitboard library
-// to represent a single chess position
+// to represent a single chess position.
 package position
 
 import (

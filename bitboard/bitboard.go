@@ -1,5 +1,5 @@
 // Package bitboard implements utility routines for
-// using chess engine bitboards
+// using chess engine bitboards.
 package bitboard
 
 import (
