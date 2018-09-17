@@ -52,6 +52,21 @@ func TestPositionContructorFen(t *testing.T) {
 
 func TestPositionUpdate(t *testing.T) {
 	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-	position.MakeMove("e2", "e3", White)
+	position.MakeMoveAlgebraic("e2", "e3", White)
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq - 1 1")
+}
+
+func TestUnMakeMove(t *testing.T) {
+	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	position.MakeMoveAlgebraic("e2", "e3", White)
+	position = position.UnMakeMove()
+	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+
+	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	position.MakeMoveAlgebraic("e2", "e3", White)
+	position.MakeMoveAlgebraic("e7", "e6", Black)
+	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppp1ppp/4p3/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 1 1")
+	position = position.UnMakeMove()
+	position = position.UnMakeMove()
+	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 }

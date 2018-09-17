@@ -44,6 +44,7 @@ type Position struct {
 	enPassanteSq   int
 	moveCt         int
 	halfMoveCt     int
+	previousPos    *Position
 }
 
 // NewPositionFen constructs Position struct instance from Forth-Edwards Notation string
@@ -59,7 +60,20 @@ func NewPositionFen(fen string) (*Position, error) {
 	p.enPassanteSq = enPassanteSq
 	p.moveCt = moveCount
 	p.halfMoveCt = halfMoveCount
+	p.previousPos = p
 	return p, nil
+}
+
+func (p *Position) Copy() *Position {
+	pCopy := new(Position)
+	*pCopy = *p
+	pCopy.bitboards[0] = make([]bitboard.Bitboard, 7)
+	pCopy.bitboards[1] = make([]bitboard.Bitboard, 7)
+	pCopy.castlingRights = make([]bitboard.Bitboard, 2)
+	copy(pCopy.bitboards[0], p.bitboards[0])
+	copy(pCopy.bitboards[1], p.bitboards[1])
+	copy(pCopy.castlingRights, p.castlingRights)
+	return pCopy
 }
 
 // AllOccupiedSqsBb returns bitboard representing which squares havea piece
@@ -101,17 +115,28 @@ func (p *Position) GetBlackBitboards() []bitboard.Bitboard {
 	return p.bitboards[Black]
 }
 
-// MakeMove updates position with single chess move
-func (p *Position) MakeMove(origin string, terminus string, activeSide int) {
-	originIndex := convertAlgebriacToIndex(origin)
-	terminusIndex := convertAlgebriacToIndex(terminus)
-	p.updateBbsSingleMove(originIndex, terminusIndex, activeSide)
+func (p *Position) UnMakeMove() *Position {
+	return p.previousPos
+}
+
+func (p *Position) MakeMove(originIndex int, terminusIndex int, activeSide int) {
+	p.previousPos = p.Copy()
+	if p.bitboards[p.activeSide][Pawns].BitIsSet(originIndex) && terminusIndex-originIndex == -16 || terminusIndex-originIndex == 16 {
+		p.enPassanteSq = (terminusIndex-originIndex)/2 + originIndex
+	}
+	p.updateMovingSidesBbs(originIndex, terminusIndex, activeSide)
 	p.switchActiveSide()
+	p.removeAttackedPieceFromBbs(terminusIndex, p.activeSide)
 	if p.activeSide == Black {
 		p.moveCt++
 	}
-	// need to update half move count (non capture or pawn plys)
-	// need to update en passante
+}
+
+// MakeMove updates position with single chess move
+func (p *Position) MakeMoveAlgebraic(origin string, terminus string, activeSide int) {
+	originIndex := convertAlgebriacToIndex(origin)
+	terminusIndex := convertAlgebriacToIndex(terminus)
+	p.MakeMove(originIndex, terminusIndex, activeSide)
 }
 
 func (p *Position) switchActiveSide() {
@@ -122,7 +147,25 @@ func (p *Position) switchActiveSide() {
 	}
 }
 
-func (p *Position) updateBbsSingleMove(origin int, terminus int, activeSide int) {
+func (p *Position) removeAttackedPieceFromBbs(terminus int, side int) {
+	switch {
+	case p.bitboards[side][Pawns].BitIsSet(terminus):
+		p.bitboards[side][Pawns].RemoveBit(terminus)
+	case p.bitboards[side][Rooks].BitIsSet(terminus):
+		p.bitboards[side][Rooks].RemoveBit(terminus)
+	case p.bitboards[side][Knights].BitIsSet(terminus):
+		p.bitboards[side][Knights].RemoveBit(terminus)
+	case p.bitboards[side][Bishops].BitIsSet(terminus):
+		p.bitboards[side][Bishops].RemoveBit(terminus)
+	case p.bitboards[side][Queen].BitIsSet(terminus):
+		p.bitboards[side][Queen].RemoveBit(terminus)
+	case p.bitboards[side][King].BitIsSet(terminus):
+		p.bitboards[side][King].RemoveBit(terminus)
+	}
+	p.updatedOccupiedSqBitboard(side)
+}
+
+func (p *Position) updateMovingSidesBbs(origin int, terminus int, activeSide int) {
 	switch {
 	case p.bitboards[activeSide][Pawns].BitIsSet(origin):
 		p.bitboards[activeSide][Pawns].SetBit(terminus)
