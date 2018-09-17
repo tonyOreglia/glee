@@ -67,17 +67,25 @@ func (mvs *LegalMoves) generateKnightMoves() {
 }
 
 func (mvs *LegalMoves) generateKingMoves() {
-	kingPosition := mvs.pos.GetActiveSidesBitboards()[position.King].Lsb()
+	kingBb := mvs.pos.GetActiveSidesBitboards()[position.King]
+	kingPosition := kingBb.Lsb()
 	kingMovesLookup, _ := bitboard.NewBitboard(mvs.ht.LegalKingMovesBbHash[mvs.pos.GetActiveSide()][kingPosition])
 	occSqsBb := mvs.pos.AllOccupiedSqsBb().Value()
+	finalRankBb, _ := bitboard.NewBitboard(mvs.ht.EighthRankBb | mvs.ht.FirstRankBb)
+	var validMovesBb *bitboard.Bitboard
 
 	// check if castling moves blocked
-	validMovesBb := generateValidDirectionalMovesBb(kingPosition, mvs.ht.EastArrayBbHash, occSqsBb, getLsb).
-		Combine(generateValidDirectionalMovesBb(kingPosition, mvs.ht.WestArrayBbHash, occSqsBb, getMsb)).
-		BitwiseAnd(kingMovesLookup).
-		Combine(kingMovesLookup).
-		RemoveOverlappingBits(mvs.pos.ActiveSideOccupiedSqsBb()).
-		RemoveOverlappingBits(mvs.pos.GetActiveSideCastlingRightsBb())
+
+	if bitboard.ReturnBitwiseAnd(finalRankBb, &kingBb).Value() != 0 {
+		validMovesBb = generateValidDirectionalMovesBb(kingPosition, mvs.ht.EastArrayBbHash, occSqsBb, getLsb).
+			Combine(generateValidDirectionalMovesBb(kingPosition, mvs.ht.WestArrayBbHash, occSqsBb, getMsb)).
+			BitwiseAnd(kingMovesLookup).
+			Combine(kingMovesLookup.RemoveOverlappingBits(finalRankBb)).
+			RemoveOverlappingBits(mvs.pos.ActiveSideOccupiedSqsBb()).
+			RemoveOverlappingBits(mvs.pos.GetActiveSideCastlingRightsBb())
+	} else {
+		validMovesBb = kingMovesLookup.RemoveOverlappingBits(mvs.pos.ActiveSideOccupiedSqsBb())
+	}
 
 	mvs.addValidMovesToArray(kingPosition, validMovesBb)
 }
@@ -97,29 +105,35 @@ func (mvs *LegalMoves) generatePawnMoves() {
 	var directionOfMovement int
 	var doublePushMask *bitboard.Bitboard
 	var promotionRank *bitboard.Bitboard
+	var attackRightShift uint
+	var attackLeftShift uint
 	if mvs.pos.GetActiveSide() == position.White {
 		getShiftedBb = bitboard.GetShiftedRightBb
 		directionOfMovement = 1
 		doublePushMask, _ = bitboard.NewBitboard(mvs.ht.FourthRankBb)
 		promotionRank, _ = bitboard.NewBitboard(mvs.ht.EighthRankBb)
+		attackRightShift = 7
+		attackLeftShift = 9
 	} else {
 		getShiftedBb = bitboard.GetShiftedLeftBb
 		directionOfMovement = -1
 		doublePushMask, _ = bitboard.NewBitboard(mvs.ht.FifthRankBb)
 		promotionRank, _ = bitboard.NewBitboard(mvs.ht.FirstRankBb)
+		attackRightShift = 9
+		attackLeftShift = 7
 	}
 
 	pawnPosBb := mvs.pos.GetActiveSidesBitboards()[position.Pawns]
 	hFileBb, _ := bitboard.NewBitboard(mvs.ht.HfileBb)
 	aFileBb, _ := bitboard.NewBitboard(mvs.ht.AfileBb)
 
-	pawnAttackBb := getShiftedBb(&pawnPosBb, 9)
+	pawnAttackBb := getShiftedBb(&pawnPosBb, attackLeftShift)
 	pawnAttackBb.RemoveOverlappingBits(hFileBb).BitwiseAnd(mvs.pos.InactiveSideOccupiedSqsBb())
-	mvs.addPawnMovesToArray(9, directionOfMovement, pawnAttackBb, promotionRank)
+	mvs.addPawnMovesToArray(int(attackLeftShift), directionOfMovement, pawnAttackBb, promotionRank)
 
-	pawnAttackBb = getShiftedBb(&pawnPosBb, 7)
+	pawnAttackBb = getShiftedBb(&pawnPosBb, attackRightShift)
 	pawnAttackBb.RemoveOverlappingBits(aFileBb).BitwiseAnd(mvs.pos.InactiveSideOccupiedSqsBb())
-	mvs.addPawnMovesToArray(7, directionOfMovement, pawnAttackBb, promotionRank)
+	mvs.addPawnMovesToArray(int(attackRightShift), directionOfMovement, pawnAttackBb, promotionRank)
 
 	pawnPushBb := getShiftedBb(&pawnPosBb, 8)
 	pawnPushBb.RemoveOverlappingBits(mvs.pos.AllOccupiedSqsBb())
@@ -175,7 +189,7 @@ func generateValidDiagonalSlidingMovesBb(index int, occSqsBb uint64, ht *hashtab
 	return generateValidDirectionalMovesBb(index, ht.NorthEastArrayBbHash, occSqsBb, getMsb).Combine(
 		generateValidDirectionalMovesBb(index, ht.NorthWestArrayBbHash, occSqsBb, getMsb).Combine(
 			generateValidDirectionalMovesBb(index, ht.SouthEastArrayBbHash, occSqsBb, getLsb).Combine(
-				generateValidDirectionalMovesBb(index, ht.SouthEastArrayBbHash, occSqsBb, getLsb))))
+				generateValidDirectionalMovesBb(index, ht.SouthWestArrayBbHash, occSqsBb, getLsb))))
 }
 
 func generateValidStraightSlidingMovesBb(index int, occSqsBb uint64, ht *hashtables.HashTables) *bitboard.Bitboard {

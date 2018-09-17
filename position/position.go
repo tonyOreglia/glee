@@ -93,6 +93,14 @@ func (p *Position) GetActiveSidesBitboards() []bitboard.Bitboard {
 	return p.bitboards[p.activeSide]
 }
 
+func (p *Position) GetWhiteBitboards() []bitboard.Bitboard {
+	return p.bitboards[White]
+}
+
+func (p *Position) GetBlackBitboards() []bitboard.Bitboard {
+	return p.bitboards[Black]
+}
+
 // MakeMove updates position with single chess move
 func (p *Position) MakeMove(origin string, terminus string, activeSide int) {
 	originIndex := convertAlgebriacToIndex(origin)

@@ -46,9 +46,24 @@ func (b *Bitboard) BitwiseAnd(bb *Bitboard) *Bitboard {
 	return b
 }
 
+func ReturnBitwiseAnd(bb *Bitboard, b *Bitboard) *Bitboard {
+	overlap, _ := NewBitboard(b.bitboard & bb.bitboard)
+	return overlap
+}
+
 func ReturnOverlapBb(bb1 *Bitboard, bb2 *Bitboard) *Bitboard {
 	overlapBb, _ := NewBitboard(bb1.Value() & bb2.Value())
 	return overlapBb
+}
+
+func (b *Bitboard) PopulationCount() int {
+	copy, _ := NewBitboard(b.Value())
+	count := 0
+	for copy.Value() != 0 {
+		copy.RemoveBit(copy.Lsb())
+		count++
+	}
+	return count
 }
 
 func (b *Bitboard) RemoveOverlappingBits(bb *Bitboard) *Bitboard {
