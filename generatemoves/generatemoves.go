@@ -3,10 +3,9 @@ package generatemoves
 import (
 	"fmt"
 
+	"github.com/tonyoreglia/glee/chessmoves"
 	"github.com/tonyoreglia/glee/evaluate"
 	"github.com/tonyoreglia/glee/hashtables"
-	"github.com/tonyoreglia/glee/legalmoves"
-	"github.com/tonyoreglia/glee/move"
 	"github.com/tonyoreglia/glee/position"
 )
 
@@ -14,10 +13,10 @@ import (
 
 var ht = hashtables.CalculateAllLookupBbs()
 
-func minMax(depth int, ply int, pos *position.Position, engineMove **move.Move, perft *int, singlePlyPerft *int) int {
+func minMax(depth int, ply int, pos *position.Position, engineMove **chessmoves.Move, perft *int, singlePlyPerft *int) int {
 	var value, tempValue int
 	root := ply == depth
-	moveList := legalmoves.NewLegalMoves(pos, ht)
+	moveList := chessmoves.NewLegalMoves(pos, ht)
 	moveList.GenerateMoves()
 	if ply == 0 {
 		return evaluate.EvaluatePosition(pos, singlePlyPerft)

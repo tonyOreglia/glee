@@ -1,4 +1,4 @@
-package legalmoves
+package chessmoves
 
 import (
 	"fmt"

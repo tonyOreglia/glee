@@ -1,6 +1,4 @@
-// Package move handles a single chess move. Position information
-// is outside the scope of this package.
-package move
+package chessmoves
 
 import (
 	"fmt"

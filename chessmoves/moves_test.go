@@ -1,4 +1,4 @@
-package moves
+package chessmoves
 
 import (
 	"testing"

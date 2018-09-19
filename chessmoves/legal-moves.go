@@ -1,31 +1,29 @@
-// Package legalmoves calculates all legal chess moves
+// Package chessmoves calculates all legal chess moves
 // from a single given chess position, which is represented
 // using the position package.
-package legalmoves
+package chessmoves
 
 import (
 	"github.com/tonyoreglia/glee/bitboard"
 	"github.com/tonyoreglia/glee/hashtables"
-	"github.com/tonyoreglia/glee/move"
-	"github.com/tonyoreglia/glee/moves"
 	"github.com/tonyoreglia/glee/position"
 )
 
 // LegalMoves stores the legal moves from a given position
 type LegalMoves struct {
-	movesList *moves.Moves
+	movesList *Moves
 	pos       *position.Position
 	ht        *hashtables.HashTables
 }
 
-func (mvs *LegalMoves) GetMovesList() []move.Move {
+func (mvs *LegalMoves) GetMovesList() []Move {
 	return mvs.movesList.GetMovesList()
 }
 
 // NewLegalMoves exposes functionality to generate legal moves from a specific position
 func NewLegalMoves(pos *position.Position, ht *hashtables.HashTables) *LegalMoves {
 	resources := &LegalMoves{}
-	resources.movesList = moves.NewMovesList()
+	resources.movesList = NewMovesList()
 	// moves.moves = make([][2]int, 0, 100)
 	resources.pos = pos
 	resources.ht = ht
