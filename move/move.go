@@ -23,6 +23,11 @@ func NewPromoMove(singleMove []int) *Move {
 	return mv
 }
 
+func (m *Move) CopyMove() *Move {
+	x := []int{m.origin, m.destination, m.promotion}
+	return NewPromoMove(x)
+}
+
 func (m *Move) GetOrigin() int {
 	return m.origin
 }

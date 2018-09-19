@@ -6,6 +6,7 @@ package legalmoves
 import (
 	"github.com/tonyoreglia/glee/bitboard"
 	"github.com/tonyoreglia/glee/hashtables"
+	"github.com/tonyoreglia/glee/move"
 	"github.com/tonyoreglia/glee/moves"
 	"github.com/tonyoreglia/glee/position"
 )
@@ -17,6 +18,10 @@ type LegalMoves struct {
 	ht        *hashtables.HashTables
 }
 
+func (mvs *LegalMoves) GetMovesList() []move.Move {
+	return mvs.movesList.GetMovesList()
+}
+
 // NewLegalMoves exposes functionality to generate legal moves from a specific position
 func NewLegalMoves(pos *position.Position, ht *hashtables.HashTables) *LegalMoves {
 	resources := &LegalMoves{}
@@ -25,6 +30,15 @@ func NewLegalMoves(pos *position.Position, ht *hashtables.HashTables) *LegalMove
 	resources.pos = pos
 	resources.ht = ht
 	return resources
+}
+
+func (mvs *LegalMoves) GenerateMoves() {
+	mvs.generatePawnMoves()
+	mvs.generateKingMoves()
+	mvs.generateQueenMoves()
+	mvs.generateRookMoves()
+	mvs.generateKnightMoves()
+	mvs.generateBishopMoves()
 }
 
 func (mvs *LegalMoves) generateLegalMovesForSinglePiece(
@@ -39,15 +53,6 @@ func (mvs *LegalMoves) generateLegalMovesForSinglePiece(
 		validMovesBb.RemoveOverlappingBits(mvs.pos.ActiveSideOccupiedSqsBb())
 		mvs.addValidMovesToArray(piecePosition, validMovesBb)
 	}
-}
-
-func (mvs *LegalMoves) generateMoves() {
-	mvs.generatePawnMoves()
-	mvs.generateKingMoves()
-	mvs.generateQueenMoves()
-	mvs.generateRookMoves()
-	mvs.generateKnightMoves()
-	mvs.generateBishopMoves()
 }
 
 func (mvs *LegalMoves) generateBishopMoves() {
@@ -68,6 +73,9 @@ func (mvs *LegalMoves) generateKnightMoves() {
 
 func (mvs *LegalMoves) generateKingMoves() {
 	kingBb := mvs.pos.GetActiveSidesBitboards()[position.King]
+	if kingBb.Value() == 0 {
+		return
+	}
 	kingPosition := kingBb.Lsb()
 	kingMovesLookup, _ := bitboard.NewBitboard(mvs.ht.LegalKingMovesBbHash[mvs.pos.GetActiveSide()][kingPosition])
 	occSqsBb := mvs.pos.AllOccupiedSqsBb().Value()

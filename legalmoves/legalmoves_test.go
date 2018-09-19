@@ -15,7 +15,7 @@ var ht = hashtables.CalculateAllLookupBbs()
 func TestGenerateMoves(t *testing.T) {
 	pos, _ := position.NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 	mvs := NewLegalMoves(pos, ht)
-	mvs.generateMoves()
+	mvs.GenerateMoves()
 	mvs.movesList.Print()
 	bb := mvs.movesList.GetBitboard()
 	bb.Print()
@@ -23,7 +23,7 @@ func TestGenerateMoves(t *testing.T) {
 
 	pos, _ = position.NewPositionFen("rnbqkbnr/pppppppp/8/8/8/7P/PPPPPPP1/RNBQKBNR b KQkq - 0 1")
 	mvs = NewLegalMoves(pos, ht)
-	mvs.generateMoves()
+	mvs.GenerateMoves()
 	mvs.movesList.Print()
 	bb = mvs.movesList.GetBitboard()
 	bb.Print()
@@ -32,7 +32,7 @@ func TestGenerateMoves(t *testing.T) {
 	// mdidle game position
 	pos, _ = position.NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
 	mvs = NewLegalMoves(pos, ht)
-	mvs.generateMoves()
+	mvs.GenerateMoves()
 	mvs.movesList.Print()
 	bb = mvs.movesList.GetBitboard()
 	bb.Print()
@@ -41,7 +41,7 @@ func TestGenerateMoves(t *testing.T) {
 	// promotion testing
 	pos, _ = position.NewPositionFen("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1")
 	mvs = NewLegalMoves(pos, ht)
-	mvs.generateMoves()
+	mvs.GenerateMoves()
 	mvs.movesList.Print()
 	bb = mvs.movesList.GetBitboard()
 	bb.Print()

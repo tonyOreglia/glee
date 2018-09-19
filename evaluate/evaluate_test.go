@@ -9,15 +9,16 @@ import (
 
 func TestEvaluatePosition(t *testing.T) {
 	// starting position should be evaluated to zero
+	perft := 0
 	pos, _ := position.NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-	score := EvaluatePosition(pos)
+	score := EvaluatePosition(pos, &perft)
 	assert.Equal(t, 0, score)
 
 	pos, _ = position.NewPositionFen("k7/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-	score = EvaluatePosition(pos)
+	score = EvaluatePosition(pos, &perft)
 	assert.Equal(t, 4010, score)
 
 	pos, _ = position.NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/8/7K w KQkq - 0 1")
-	score = EvaluatePosition(pos)
+	score = EvaluatePosition(pos, &perft)
 	assert.Equal(t, -4010, score)
 }

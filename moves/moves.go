@@ -23,6 +23,10 @@ func NewMovesList() *Moves {
 	return movesStruct
 }
 
+func (m *Moves) GetMovesList() []move.Move {
+	return m.mvs
+}
+
 // AddMove adds a move to instance of Moves struct
 func (m *Moves) AddMove(origin int, dest int) {
 	mv := move.NewMove([]int{origin, dest})

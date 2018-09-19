@@ -86,6 +86,13 @@ func (p *Position) ActiveSideOccupiedSqsBb() *bitboard.Bitboard {
 	return &p.bitboards[p.activeSide][OccupiedSqs]
 }
 
+func (p *Position) IsWhitesTurn() bool {
+	if p.activeSide == White {
+		return true
+	}
+	return false
+}
+
 func (p *Position) InactiveSideOccupiedSqsBb() *bitboard.Bitboard {
 	if p.activeSide == White {
 		return &p.bitboards[Black][OccupiedSqs]
@@ -531,4 +538,33 @@ func convertBitboardsToFenString(bb [2][]bitboard.Bitboard) string {
 		convertSingleBbRowToFenString(rank, &fenString, &emptySqs, bb)
 	}
 	return fenString
+}
+
+func (p *Position) Print() {
+	bb := p.bitboards
+	fenString := ""
+	emptySqs := 0
+	for rank := int(0); rank < 8; rank++ {
+		getRowString(rank, &fenString, &emptySqs, bb)
+		fenString = ""
+	}
+	// fmt.Println(fenString)
+}
+
+func getRowString(rank int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
+	for file := int(0); file < 8; file++ {
+		convertSingleBbIndexToFen(file, rank, fenString, emptySqs, bb)
+	}
+	if !bb[White][OccupiedSqs].BitIsSet((rank+1)*8-1) && !bb[Black][OccupiedSqs].BitIsSet((rank+1)*8-1) {
+		for i := 0; i < *emptySqs; i++ {
+			*fenString += "-"
+		}
+		// *fenString += strconv.Itoa(*emptySqs)
+	}
+	// notFirstRank := rank != 7
+	// if notFirstRank {
+	// 	*fenString += "/"
+	// }
+	fmt.Println(*fenString)
+	*emptySqs = 0
 }

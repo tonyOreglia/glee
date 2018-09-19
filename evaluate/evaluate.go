@@ -4,8 +4,10 @@ import (
 	"github.com/tonyoreglia/glee/position"
 )
 
-func EvaluatePosition(pos *position.Position) int {
+func EvaluatePosition(pos *position.Position, perft *int) int {
+	// pos.Print()
 	score := 0
+	*perft++
 
 	whiteKingBb := pos.GetWhiteBitboards()[position.King]
 	whiteQueenBb := pos.GetWhiteBitboards()[position.Queen]

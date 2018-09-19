@@ -71,7 +71,7 @@ func CalculateAllLookupBbs() *HashTables {
 	generateSingleBitLookup(hashTables)
 	generateArrayBitboardLookup(hashTables)
 	generateEnPassantBitboardLookup(hashTables)
-	PrintAllBitboards(hashTables)
+	// PrintAllBitboards(hashTables)
 	return hashTables
 }
 
