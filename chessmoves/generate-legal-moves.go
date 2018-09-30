@@ -1,6 +1,5 @@
 // Package chessmoves calculates all legal chess moves
-// from a single given chess position, which is represented
-// using the position package.
+// from a single given chess position using position library.
 package chessmoves
 
 import (
@@ -9,20 +8,20 @@ import (
 	"github.com/tonyoreglia/glee/position"
 )
 
-// LegalMoves stores the legal moves from a given position
-type LegalMoves struct {
+// LegalMoveGenerator stores the legal moves from a given position
+type LegalMoveGenerator struct {
 	movesList *Moves
 	pos       *position.Position
 	ht        *hashtables.HashTables
 }
 
-func (mvs *LegalMoves) GetMovesList() []Move {
+func (mvs *LegalMoveGenerator) GetMovesList() []Move {
 	return mvs.movesList.GetMovesList()
 }
 
-// NewLegalMoves exposes functionality to generate legal moves from a specific position
-func NewLegalMoves(pos *position.Position, ht *hashtables.HashTables) *LegalMoves {
-	resources := &LegalMoves{}
+// NewLegalMoveGenerator exposes functionality to generate legal moves from a specific position
+func NewLegalMoveGenerator(pos *position.Position, ht *hashtables.HashTables) *LegalMoveGenerator {
+	resources := &LegalMoveGenerator{}
 	resources.movesList = NewMovesList()
 	// moves.moves = make([][2]int, 0, 100)
 	resources.pos = pos
@@ -30,7 +29,7 @@ func NewLegalMoves(pos *position.Position, ht *hashtables.HashTables) *LegalMove
 	return resources
 }
 
-func (mvs *LegalMoves) GenerateMoves() {
+func (mvs *LegalMoveGenerator) GenerateMoves() {
 	mvs.generatePawnMoves()
 	mvs.generateKingMoves()
 	mvs.generateQueenMoves()
@@ -39,7 +38,7 @@ func (mvs *LegalMoves) GenerateMoves() {
 	mvs.generateBishopMoves()
 }
 
-func (mvs *LegalMoves) generateLegalMovesForSinglePiece(
+func (mvs *LegalMoveGenerator) generateLegalMovesForSinglePiece(
 	pieceLocationsBb uint64, genValidMovesFn func(int, uint64, *hashtables.HashTables) *bitboard.Bitboard) {
 
 	pieceLocationBbCopy, _ := bitboard.NewBitboard(pieceLocationsBb)
@@ -53,23 +52,23 @@ func (mvs *LegalMoves) generateLegalMovesForSinglePiece(
 	}
 }
 
-func (mvs *LegalMoves) generateBishopMoves() {
+func (mvs *LegalMoveGenerator) generateBishopMoves() {
 	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards()[position.Bishops].Value(), generateValidDiagonalSlidingMovesBb)
 }
 
-func (mvs *LegalMoves) generateRookMoves() {
+func (mvs *LegalMoveGenerator) generateRookMoves() {
 	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards()[position.Rooks].Value(), generateValidStraightSlidingMovesBb)
 }
 
-func (mvs *LegalMoves) generateQueenMoves() {
+func (mvs *LegalMoveGenerator) generateQueenMoves() {
 	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards()[position.Queen].Value(), generateSlidingMovesBb)
 }
 
-func (mvs *LegalMoves) generateKnightMoves() {
+func (mvs *LegalMoveGenerator) generateKnightMoves() {
 	mvs.generateLegalMovesForSinglePiece(mvs.pos.GetActiveSidesBitboards()[position.Knights].Value(), getKnightMovesBb)
 }
 
-func (mvs *LegalMoves) generateKingMoves() {
+func (mvs *LegalMoveGenerator) generateKingMoves() {
 	kingBb := mvs.pos.GetActiveSidesBitboards()[position.King]
 	if kingBb.Value() == 0 {
 		return
@@ -96,7 +95,7 @@ func (mvs *LegalMoves) generateKingMoves() {
 	mvs.addValidMovesToArray(kingPosition, validMovesBb)
 }
 
-func (mvs *LegalMoves) getKingMovesBb(index int, occSqsBb uint64, ht *hashtables.HashTables) *bitboard.Bitboard {
+func (mvs *LegalMoveGenerator) getKingMovesBb(index int, occSqsBb uint64, ht *hashtables.HashTables) *bitboard.Bitboard {
 	kingMoves := ht.LegalKingMovesBbHash[mvs.pos.GetActiveSide()][index]
 	kingMovesBb, _ := bitboard.NewBitboard(kingMoves)
 
@@ -106,7 +105,7 @@ func (mvs *LegalMoves) getKingMovesBb(index int, occSqsBb uint64, ht *hashtables
 		Combine(kingMovesBb)
 }
 
-func (mvs *LegalMoves) generatePawnMoves() {
+func (mvs *LegalMoveGenerator) generatePawnMoves() {
 	var getShiftedBb func(*bitboard.Bitboard, uint) *bitboard.Bitboard
 	var directionOfMovement int
 	var doublePushMask *bitboard.Bitboard
@@ -150,7 +149,7 @@ func (mvs *LegalMoves) generatePawnMoves() {
 	mvs.addPawnMovesToArray(16, directionOfMovement, doubleRankpawnPushBb, promotionRank)
 }
 
-func (mvs *LegalMoves) addPawnMovesToArray(shift int, shiftDirection int, pawnPushBb *bitboard.Bitboard, promoRank *bitboard.Bitboard) {
+func (mvs *LegalMoveGenerator) addPawnMovesToArray(shift int, shiftDirection int, pawnPushBb *bitboard.Bitboard, promoRank *bitboard.Bitboard) {
 	shift = shift * shiftDirection
 	for pawnPushBb.Value() != 0 {
 		dest := pawnPushBb.Lsb()
@@ -170,7 +169,7 @@ func (mvs *LegalMoves) addPawnMovesToArray(shift int, shiftDirection int, pawnPu
 }
 
 // AddValidMovesToArray save subset of valid moves from current position
-func (mvs *LegalMoves) addValidMovesToArray(index int, validMovesBb *bitboard.Bitboard) {
+func (mvs *LegalMoveGenerator) addValidMovesToArray(index int, validMovesBb *bitboard.Bitboard) {
 	var validMove int
 	for validMovesBb.Value() != 0 {
 		validMove = validMovesBb.Lsb()

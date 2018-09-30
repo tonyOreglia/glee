@@ -57,16 +57,43 @@ func TestPositionUpdate(t *testing.T) {
 }
 
 func TestUnMakeMove(t *testing.T) {
+	// unmake single move
 	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 	position.MakeMoveAlgebraic("e2", "e3", White)
 	position = position.UnMakeMove()
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
+	// unmaking multiple moves in a row
 	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 	position.MakeMoveAlgebraic("e2", "e3", White)
 	position.MakeMoveAlgebraic("e7", "e6", Black)
-	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppp1ppp/4p3/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 1 1")
+	position.MakeMoveAlgebraic("d2", "d4", White)
+	assert.Equal(t, "rnbqkbnr/pppp1ppp/4p3/8/3P4/4P3/PPP2PPP/RNBQKBNR b KQkq d3 2 1", position.GetFenString())
+	position = position.UnMakeMove()
 	position = position.UnMakeMove()
 	position = position.UnMakeMove()
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+
+	// unmake attacking move
+	position, _ = NewPositionFen("7k/8/8/8/8/8/7p/6KR w q - 0 1")
+	position.MakeMoveAlgebraic("h1", "h2", White)
+	assert.Equal(t, position.GetFenString(), "7k/8/8/8/8/8/7R/6K1 b q - 1 1")
+	position = position.UnMakeMove()
+	assert.Equal(t, position.GetFenString(), "7k/8/8/8/8/8/7p/6KR w q - 0 1")
+
+	//unmake en passante move
+	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	position.MakeMoveAlgebraic("e2", "e4", White)
+	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 1 1")
+	position = position.UnMakeMove()
+	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+}
+
+func TestPrintPos(t *testing.T) {
+	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	position.Print()
+	position, _ = NewPositionFen("7k/8/8/8/8/8/7p/6KR w q - 0 1")
+	position.Print()
+
+	assert.Equal(t, 1, 1)
 }

@@ -13,20 +13,25 @@ import (
 
 var ht = hashtables.CalculateAllLookupBbs()
 
-func minMax(depth int, ply int, pos *position.Position, engineMove **chessmoves.Move, perft *int, singlePlyPerft *int) int {
+func minMax(depth int, ply int, pos **position.Position, engineMove **chessmoves.Move, perft *int, singlePlyPerft *int) int {
 	var value, tempValue int
 	root := ply == depth
-	moveList := chessmoves.NewLegalMoves(pos, ht)
-	moveList.GenerateMoves()
+	moveGenerator := chessmoves.NewLegalMoveGenerator(*pos, ht)
+	moveGenerator.GenerateMoves()
 	if ply == 0 {
-		return evaluate.EvaluatePosition(pos, singlePlyPerft)
+		return evaluate.EvaluatePosition(*pos, singlePlyPerft)
 	}
-	if pos.IsWhitesTurn() {
+	if (*pos).IsWhitesTurn() {
 		value = -30000
-		mvList := moveList.GetMovesList()
+		mvList := moveGenerator.GetMovesList()
 		for _, move := range mvList {
-			pos.MakeMove(move.GetOrigin(), move.GetDestination(), pos.GetActiveSide())
+			fmt.Printf("%p\n", pos)
+			(*pos).Print()
+			(*pos).MakeMove(move.GetOrigin(), move.GetDestination(), (*pos).GetActiveSide())
+
 			tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
+			fmt.Printf("%p\n", pos)
+			(*pos).Print()
 			if tempValue > value {
 				value = tempValue
 				if root {
@@ -35,17 +40,19 @@ func minMax(depth int, ply int, pos *position.Position, engineMove **chessmoves.
 			}
 			if root {
 				fmt.Println("move: ", move, "-- perft: ", *singlePlyPerft)
+				// pos.Print()
 				*perft += *singlePlyPerft
 				*singlePlyPerft = 0
 			}
-			pos.UnMakeMove()
+			*pos = (*pos).UnMakeMove()
 		}
 		return value
 	}
 	value = 30000
-	mvList := moveList.GetMovesList()
+	mvList := moveGenerator.GetMovesList()
 	for _, move := range mvList {
-		pos.MakeMove(move.GetOrigin(), move.GetDestination(), pos.GetActiveSide())
+		(*pos).MakeMove(move.GetOrigin(), move.GetDestination(), (*pos).GetActiveSide())
+		(*pos).Print()
 		tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
 		if tempValue < value {
 			value = tempValue
@@ -53,8 +60,12 @@ func minMax(depth int, ply int, pos *position.Position, engineMove **chessmoves.
 				*engineMove = move.CopyMove()
 			}
 		}
-		pos.UnMakeMove()
+		*pos = (*pos).UnMakeMove()
+		(*pos).Print()
 	}
+	fmt.Println("returning from black move gen")
+	fmt.Printf("%p\n", pos)
+	(*pos).Print()
 	return value
 }
 

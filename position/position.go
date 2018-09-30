@@ -466,7 +466,122 @@ func (p *Position) updatedOccupiedSqBitboard(activeSide int) {
 			p.bitboards[activeSide][Queen].Value())
 }
 
-func convertSingleBbIndexToFen(i int, j int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
+// func convertSingleBbIndexToFen(i int, j int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
+// 	index := int(j*8 + i)
+// 	switch {
+// 	case bb[White][King].BitIsSet(index):
+// 		*fenString += "K"
+// 		*emptySqs = 0
+// 	case bb[White][Queen].BitIsSet(index):
+// 		*fenString += "Q"
+// 		*emptySqs = 0
+// 	case bb[White][Bishops].BitIsSet(index):
+// 		*fenString += "B"
+// 		*emptySqs = 0
+// 	case bb[White][Rooks].BitIsSet(index):
+// 		*fenString += "R"
+// 		*emptySqs = 0
+// 	case bb[White][Knights].BitIsSet(index):
+// 		*fenString += "N"
+// 		*emptySqs = 0
+// 	case bb[White][Pawns].BitIsSet(index):
+// 		*fenString += "P"
+// 		*emptySqs = 0
+// 	case bb[Black][King].BitIsSet(index):
+// 		*fenString += "k"
+// 		*emptySqs = 0
+// 	case bb[Black][Queen].BitIsSet(index):
+// 		*fenString += "q"
+// 		*emptySqs = 0
+// 	case bb[Black][Bishops].BitIsSet(index):
+// 		*fenString += "b"
+// 		*emptySqs = 0
+// 	case bb[Black][Rooks].BitIsSet(index):
+// 		*fenString += "r"
+// 		*emptySqs = 0
+// 	case bb[Black][Knights].BitIsSet(index):
+// 		*fenString += "n"
+// 		*emptySqs = 0
+// 	case bb[Black][Pawns].BitIsSet(index):
+// 		*fenString += "p"
+// 		*emptySqs = 0
+// 	default:
+// 		*emptySqs++
+// 		nextWhiteSqOcc := bb[White][OccupiedSqs].BitIsSet(index + 1)
+// 		nexBlackSqOcc := bb[Black][OccupiedSqs].BitIsSet(index + 1)
+// 		nextSqOcc := nextWhiteSqOcc || nexBlackSqOcc
+// 		notHFile := i != 7
+// 		if nextSqOcc && notHFile {
+// 			*fenString += strconv.Itoa(*emptySqs)
+// 		}
+// 	}
+// }
+
+func convertSingleBbRowToFenString(rank int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
+	for file := int(0); file < 8; file++ {
+		convertSingleIndexToString(file, rank, fenString, emptySqs, bb, defaultSingleIndexConversionToFenString)
+	}
+	if !bb[White][OccupiedSqs].BitIsSet((rank+1)*8-1) && !bb[Black][OccupiedSqs].BitIsSet((rank+1)*8-1) {
+		*fenString += strconv.Itoa(*emptySqs)
+	}
+	notFirstRank := rank != 7
+	if notFirstRank {
+		*fenString += "/"
+	}
+	*emptySqs = 0
+}
+
+func convertBitboardsToFenString(bb [2][]bitboard.Bitboard) string {
+	fenString := ""
+	emptySqs := 0
+	for rank := int(0); rank < 8; rank++ {
+		convertSingleBbRowToFenString(rank, &fenString, &emptySqs, bb)
+	}
+	return fenString
+}
+
+func (p *Position) Print() {
+	bb := p.bitboards
+	fenString := ""
+	emptySqs := 0
+	for rank := int(0); rank < 8; rank++ {
+		getRowString(rank, &fenString, &emptySqs, bb)
+		fenString = ""
+	}
+	fmt.Print("\n\n")
+}
+
+func defaultSingleIndexConversionToCharacter(index int, file int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
+	*fenString += "."
+}
+
+func defaultSingleIndexConversionToFenString(index int, file int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
+	*emptySqs++
+	nextWhiteSqOcc := bb[White][OccupiedSqs].BitIsSet(index + 1)
+	nexBlackSqOcc := bb[Black][OccupiedSqs].BitIsSet(index + 1)
+	nextSqOcc := nextWhiteSqOcc || nexBlackSqOcc
+	notHFile := file != 7
+	if nextSqOcc && notHFile {
+		*fenString += strconv.Itoa(*emptySqs)
+	}
+}
+
+func getRowString(rank int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
+	for file := int(0); file < 8; file++ {
+		convertSingleIndexToString(file, rank, fenString, emptySqs, bb, defaultSingleIndexConversionToCharacter)
+		*fenString += " "
+	}
+	if !bb[White][OccupiedSqs].BitIsSet((rank+1)*8-1) && !bb[Black][OccupiedSqs].BitIsSet((rank+1)*8-1) {
+		for i := 0; i < *emptySqs; i++ {
+			*fenString += "-"
+		}
+	}
+	fmt.Println(*fenString)
+	*emptySqs = 0
+}
+
+func convertSingleIndexToString(i int, j int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard,
+	defaultAction func(int, int, *string, *int, [2][]bitboard.Bitboard)) {
 	index := int(j*8 + i)
 	switch {
 	case bb[White][King].BitIsSet(index):
@@ -506,65 +621,7 @@ func convertSingleBbIndexToFen(i int, j int, fenString *string, emptySqs *int, b
 		*fenString += "p"
 		*emptySqs = 0
 	default:
-		*emptySqs++
-		nextWhiteSqOcc := bb[White][OccupiedSqs].BitIsSet(index + 1)
-		nexBlackSqOcc := bb[Black][OccupiedSqs].BitIsSet(index + 1)
-		nextSqOcc := nextWhiteSqOcc || nexBlackSqOcc
-		notHFile := i != 7
-		if nextSqOcc && notHFile {
-			*fenString += strconv.Itoa(*emptySqs)
-		}
+		defaultAction(index, i, fenString, emptySqs, bb)
+		// *fenString += ". "
 	}
-}
-
-func convertSingleBbRowToFenString(rank int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
-	for file := int(0); file < 8; file++ {
-		convertSingleBbIndexToFen(file, rank, fenString, emptySqs, bb)
-	}
-	if !bb[White][OccupiedSqs].BitIsSet((rank+1)*8-1) && !bb[Black][OccupiedSqs].BitIsSet((rank+1)*8-1) {
-		*fenString += strconv.Itoa(*emptySqs)
-	}
-	notFirstRank := rank != 7
-	if notFirstRank {
-		*fenString += "/"
-	}
-	*emptySqs = 0
-}
-
-func convertBitboardsToFenString(bb [2][]bitboard.Bitboard) string {
-	fenString := ""
-	emptySqs := 0
-	for rank := int(0); rank < 8; rank++ {
-		convertSingleBbRowToFenString(rank, &fenString, &emptySqs, bb)
-	}
-	return fenString
-}
-
-func (p *Position) Print() {
-	bb := p.bitboards
-	fenString := ""
-	emptySqs := 0
-	for rank := int(0); rank < 8; rank++ {
-		getRowString(rank, &fenString, &emptySqs, bb)
-		fenString = ""
-	}
-	// fmt.Println(fenString)
-}
-
-func getRowString(rank int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
-	for file := int(0); file < 8; file++ {
-		convertSingleBbIndexToFen(file, rank, fenString, emptySqs, bb)
-	}
-	if !bb[White][OccupiedSqs].BitIsSet((rank+1)*8-1) && !bb[Black][OccupiedSqs].BitIsSet((rank+1)*8-1) {
-		for i := 0; i < *emptySqs; i++ {
-			*fenString += "-"
-		}
-		// *fenString += strconv.Itoa(*emptySqs)
-	}
-	// notFirstRank := rank != 7
-	// if notFirstRank {
-	// 	*fenString += "/"
-	// }
-	fmt.Println(*fenString)
-	*emptySqs = 0
 }
