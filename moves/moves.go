@@ -1,4 +1,4 @@
-package chessmoves
+package moves
 
 import (
 	"fmt"
@@ -13,6 +13,7 @@ type Moves struct {
 }
 
 // NewMovesList creates instance of Moves struct
+// Should be renamed to New()
 func NewMovesList() *Moves {
 	movesStruct := new(Moves)
 	movesStruct.mvs = make([]Move, 0, 100)
@@ -51,6 +52,14 @@ func (m *Moves) Length() int {
 
 func (m *Moves) Print() {
 	fmt.Print(m.mvs)
+}
+
+func (m *Moves) AttackedSqsBb() bitboard.Bitboard {
+	var bb bitboard.Bitboard
+	for _, move := range m.mvs {
+		bb.SetBit(move.destination)
+	}
+	return bb
 }
 
 func (m *Moves) GetMoves() [][]int {

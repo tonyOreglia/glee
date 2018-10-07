@@ -5,24 +5,29 @@ package chessmoves
 import (
 	"github.com/tonyoreglia/glee/bitboard"
 	"github.com/tonyoreglia/glee/hashtables"
+	"github.com/tonyoreglia/glee/moves"
 	"github.com/tonyoreglia/glee/position"
 )
 
 // LegalMoveGenerator stores the legal moves from a given position
 type LegalMoveGenerator struct {
-	movesList *Moves
+	movesList *moves.Moves
 	pos       *position.Position
 	ht        *hashtables.HashTables
 }
 
-func (mvs *LegalMoveGenerator) GetMovesList() []Move {
+func (mvs *LegalMoveGenerator) GetMovesList() []moves.Move {
 	return mvs.movesList.GetMovesList()
+}
+
+func (mvs *LegalMoveGenerator) MovesStruct() *moves.Moves {
+	return mvs.movesList
 }
 
 // NewLegalMoveGenerator exposes functionality to generate legal moves from a specific position
 func NewLegalMoveGenerator(pos *position.Position, ht *hashtables.HashTables) *LegalMoveGenerator {
 	resources := &LegalMoveGenerator{}
-	resources.movesList = NewMovesList()
+	resources.movesList = moves.NewMovesList()
 	// moves.moves = make([][2]int, 0, 100)
 	resources.pos = pos
 	resources.ht = ht

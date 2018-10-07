@@ -1,4 +1,4 @@
-package chessmoves
+package moves
 
 import (
 	"fmt"

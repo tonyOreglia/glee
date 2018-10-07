@@ -114,6 +114,18 @@ func (p *Position) GetActiveSidesBitboards() []bitboard.Bitboard {
 	return p.bitboards[p.activeSide]
 }
 
+func (p *Position) ActiveSideKingBb() bitboard.Bitboard {
+	return p.bitboards[p.activeSide][King]
+}
+
+func (p *Position) WhiteKingBb() bitboard.Bitboard {
+	return p.bitboards[White][King]
+}
+
+func (p *Position) BlackKingBb() bitboard.Bitboard {
+	return p.bitboards[Black][King]
+}
+
 func (p *Position) GetWhiteBitboards() []bitboard.Bitboard {
 	return p.bitboards[White]
 }
@@ -144,6 +156,10 @@ func (p *Position) MakeMoveAlgebraic(origin string, terminus string, activeSide 
 	originIndex := convertAlgebriacToIndex(origin)
 	terminusIndex := convertAlgebriacToIndex(terminus)
 	p.MakeMove(originIndex, terminusIndex, activeSide)
+}
+
+func (p *Position) IsAttacked(kingBb bitboard.Bitboard, destSqsBb bitboard.Bitboard) bool {
+	return kingBb.BitwiseAnd(&destSqsBb).Value() != uint64(0)
 }
 
 func (p *Position) switchActiveSide() {

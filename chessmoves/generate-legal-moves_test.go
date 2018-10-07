@@ -29,6 +29,14 @@ func TestGenerateMoves(t *testing.T) {
 	bb.Print()
 	assert.Equal(t, 20, mvs.movesList.Length())
 
+	pos, _ = position.NewPositionFen("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1")
+	mvs = NewLegalMoveGenerator(pos, ht)
+	mvs.GenerateMoves()
+	mvs.movesList.Print()
+	bb = mvs.movesList.GetBitboard()
+	bb.Print()
+	assert.Equal(t, 25, mvs.movesList.Length())
+
 	// mdidle game position
 	pos, _ = position.NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
 	mvs = NewLegalMoveGenerator(pos, ht)

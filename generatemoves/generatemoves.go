@@ -1,11 +1,10 @@
 package generatemoves
 
 import (
-	"fmt"
-
 	"github.com/tonyoreglia/glee/chessmoves"
 	"github.com/tonyoreglia/glee/evaluate"
 	"github.com/tonyoreglia/glee/hashtables"
+	"github.com/tonyoreglia/glee/moves"
 	"github.com/tonyoreglia/glee/position"
 )
 
@@ -13,7 +12,7 @@ import (
 
 var ht = hashtables.CalculateAllLookupBbs()
 
-func minMax(depth int, ply int, pos **position.Position, engineMove **chessmoves.Move, perft *int, singlePlyPerft *int) int {
+func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) int {
 	var value, tempValue int
 	root := ply == depth
 	moveGenerator := chessmoves.NewLegalMoveGenerator(*pos, ht)
@@ -25,13 +24,19 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **chessmoves
 		value = -30000
 		mvList := moveGenerator.GetMovesList()
 		for _, move := range mvList {
-			fmt.Printf("%p\n", pos)
-			(*pos).Print()
+			// fmt.Printf("%p\n", pos)
+			// (*pos).Print()
 			(*pos).MakeMove(move.GetOrigin(), move.GetDestination(), (*pos).GetActiveSide())
+			mg := chessmoves.NewLegalMoveGenerator(*pos, ht)
+			mg.GenerateMoves()
+			if (*pos).IsAttacked((*pos).WhiteKingBb(), mg.MovesStruct().AttackedSqsBb()) {
+				*pos = (*pos).UnMakeMove()
+				continue
+			}
 
 			tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
-			fmt.Printf("%p\n", pos)
-			(*pos).Print()
+			// fmt.Printf("%p\n", pos)
+			// (*pos).Print()
 			if tempValue > value {
 				value = tempValue
 				if root {
@@ -39,8 +44,7 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **chessmoves
 				}
 			}
 			if root {
-				fmt.Println("move: ", move, "-- perft: ", *singlePlyPerft)
-				// pos.Print()
+				// fmt.Println("move: ", move, "-- perft: ", *singlePlyPerft)
 				*perft += *singlePlyPerft
 				*singlePlyPerft = 0
 			}
@@ -53,6 +57,13 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **chessmoves
 	for _, move := range mvList {
 		(*pos).MakeMove(move.GetOrigin(), move.GetDestination(), (*pos).GetActiveSide())
 		(*pos).Print()
+		mg := chessmoves.NewLegalMoveGenerator(*pos, ht)
+		mg.GenerateMoves()
+		if (*pos).IsAttacked((*pos).BlackKingBb(), mg.MovesStruct().AttackedSqsBb()) {
+			*pos = (*pos).UnMakeMove()
+			continue
+		}
+		// (*pos).Print()
 		tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
 		if tempValue < value {
 			value = tempValue
@@ -60,84 +71,19 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **chessmoves
 				*engineMove = move.CopyMove()
 			}
 		}
+		if root {
+			// fmt.Println("move: ", move, "-- perft: ", *singlePlyPerft)
+			*perft += *singlePlyPerft
+			*singlePlyPerft = 0
+		}
 		*pos = (*pos).UnMakeMove()
-		(*pos).Print()
+		// (*pos).Print()
 	}
-	fmt.Println("returning from black move gen")
-	fmt.Printf("%p\n", pos)
-	(*pos).Print()
+	// fmt.Println("returning from black move gen")
+	// fmt.Printf("%p\n", pos)
+	// (*pos).Print()
 	return value
 }
-
-// func searchMax(depth int, pos *position.Position) {
-// 	if  depth == 0 {
-// 		return evaluate.EvaluatePosition()
-// 	}
-
-// 	max := -30000
-// 	root := depth == Depth
-
-// 	// total := position->move_t.size()
-
-// 	// if root {
-// 	// 		move_count = position->move_t.size();
-// 	// }
-// 	// if(total == start) {
-// 	// 		return -3000;
-// 	// }
-// 	for j := 0; j < total; j++ {
-// 			if(make_move(j)) {
-// 					if(root) {
-// 							position->print_algebraic(position->game_t.size()-1);
-// 							std::cout << "\t\t";
-// 					}
-// 					score = search_min(depth - 1, total);
-// 					if(root) {
-// 							std::cout << perft << std::endl;
-// 							perft_total += perft;
-// 							perft = 0;
-// 					}
-// 					unmake_move();
-// 					position->clear_moves(total, position->move_t.size());
-// 					if(score > max) {
-// 							max = score;
-// 							if(root) engine_move = j;
-// 					}
-// 			}
-// 	}
-// 	return max;
-// }
-
-// int game::search_min(char depth, int start) {
-// 	if( depth == 0) return evaluate();
-// 	int min = 30000;
-// 	bool root = depth == DEPTH;
-// 	int total = position->move_t.size();
-// 	if(root) {
-// 			move_count = position->move_t.size();
-// 	}
-// 	for(int j=start; j < total; j++) {
-// 			if(make_move(j)) {
-// 					if(root) {
-// 							position->print_algebraic(position->game_t.size()-1);
-// 							std::cout << "\t\t";
-// 					}
-// 					score = search_max(depth - 1, total);
-// 					if(root) {
-// 							std::cout << perft << std::endl;
-// 							perft_total += perft;
-// 							perft = 0;
-// 					}
-// 					unmake_move();
-// 					position->clear_moves(total, position->move_t.size());
-// 					if(score < min) {
-// 							min = score;
-// 							if(root) engine_move = j;
-// 					}
-// 			}
-// 	}
-// 	return min;
-// }
 
 // int game::alpha_beta_max(int alpha, int beta, char depth, int start) {
 // 	bool no_moves = true;
