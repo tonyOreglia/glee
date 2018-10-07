@@ -1,6 +1,6 @@
-// Package chessmoves calculates all legal chess moves
+// Package generate calculates all legal chess moves
 // from a single given chess position using position library.
-package chessmoves
+package generate
 
 import (
 	"github.com/tonyoreglia/glee/bitboard"

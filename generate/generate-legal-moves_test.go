@@ -1,4 +1,4 @@
-package chessmoves
+package generate
 
 import (
 	"fmt"
