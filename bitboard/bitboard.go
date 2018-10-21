@@ -120,7 +120,6 @@ func (b *Bitboard) Lsb() int {
 }
 
 func (b *Bitboard) RemoveBit(pos int) error {
-	// b.bitboard ^= 1 << uint64(pos)
 	b.bitboard &= ^ht.Lookup.SingleIndexBbHash[pos]
 	return nil
 }

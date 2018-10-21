@@ -300,16 +300,16 @@ func (p *Position) setActiveSide(activeSide int) {
 
 func (p *Position) revokeQueenSideCastlingRight() {
 	if p.activeSide == White && p.castlingRights[White].BitIsNotSet(WhiteKingSideCastlingRightsBit) {
-		p.castlingRights[p.activeSide].RemoveBit(WhiteQueenSideCastlingRightsBit)
+		p.castlingRights[p.activeSide].SetBit(WhiteQueenSideCastlingRightsBit)
 	}
-	p.castlingRights[p.activeSide].RemoveBit(BlackQueenSideCastlingRightsBit)
+	p.castlingRights[p.activeSide].SetBit(BlackQueenSideCastlingRightsBit)
 }
 
 func (p *Position) revokeKingSideCastlingRight() {
 	if p.activeSide == White {
-		p.castlingRights[p.activeSide].RemoveBit(WhiteKingSideCastlingRightsBit)
+		p.castlingRights[p.activeSide].SetBit(WhiteKingSideCastlingRightsBit)
 	}
-	p.castlingRights[p.activeSide].RemoveBit(BlackKingSideCastlingRightsBit)
+	p.castlingRights[p.activeSide].SetBit(BlackKingSideCastlingRightsBit)
 }
 
 func (p *Position) setCastlingRightsFromFen(castlingRights string) {
