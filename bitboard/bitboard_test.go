@@ -23,6 +23,18 @@ func TestBitboardGet(t *testing.T) {
 	assert.Equal(t, value, uint64(100))
 }
 
+func TestBitboardRemoveBit(t *testing.T) {
+	// should remove a set bit
+	bitboard, _ := NewBitboard(1)
+	assert.Equal(t, uint64(1), bitboard.Value())
+	bitboard.RemoveBit(0)
+	assert.Equal(t, uint64(0), bitboard.Value())
+
+	// should not switch bit if it's not set
+	bitboard.RemoveBit(0)
+	assert.Equal(t, uint64(0), bitboard.Value())
+}
+
 func TestBitboardLsb(t *testing.T) {
 	bitboard, _ := NewBitboard(1)
 	position := bitboard.Lsb()

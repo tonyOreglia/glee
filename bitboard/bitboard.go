@@ -5,6 +5,8 @@ package bitboard
 import (
 	"fmt"
 	"math/bits"
+
+	ht "github.com/tonyoreglia/glee/hashtables"
 )
 
 // Bitboard struct exposes uint64 "bitboard" with associated getter, setter, and helper fxns
@@ -117,10 +119,9 @@ func (b *Bitboard) Lsb() int {
 	return int(bits.TrailingZeros64(b.Value()))
 }
 
-// Does not check that this bit is set as speed is priority.
 func (b *Bitboard) RemoveBit(pos int) error {
-	b.bitboard ^= 1 << uint64(pos)
-	// b.bitboard &= ^hashtables.SingleIndexBbHash[pos]
+	// b.bitboard ^= 1 << uint64(pos)
+	b.bitboard &= ^ht.Lookup.SingleIndexBbHash[pos]
 	return nil
 }
 
