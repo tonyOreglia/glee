@@ -10,12 +10,12 @@ import (
 
 // const Depth = 1
 
-var ht = hashtables.CalculateAllLookupBbs()
+var ht = hashtables.Lookup
 
 func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) int {
 	var value, tempValue int
 	root := ply == depth
-	moveGenerator := generate.NewLegalMoveGenerator(*pos, ht)
+	moveGenerator := generate.NewLegalMoveGenerator(*pos)
 	moveGenerator.GenerateMoves()
 	if ply == 0 {
 		return evaluate.EvaluatePosition(*pos, singlePlyPerft)
@@ -27,7 +27,7 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 			(*pos).Move(move)
 			// fmt.Println("White Position")
 			(*pos).Print()
-			mg := generate.NewLegalMoveGenerator(*pos, ht)
+			mg := generate.NewLegalMoveGenerator(*pos)
 			mg.GenerateMoves()
 			if (*pos).IsAttacked((*pos).WhiteKingBb(), mg.MovesStruct().AttackedSqsBb()) {
 				*pos = (*pos).UnMakeMove()
@@ -53,7 +53,7 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 	mvList := moveGenerator.GetMovesList()
 	for _, move := range mvList {
 		(*pos).Move(move)
-		mg := generate.NewLegalMoveGenerator(*pos, ht)
+		mg := generate.NewLegalMoveGenerator(*pos)
 		mg.GenerateMoves()
 		if (*pos).IsAttacked((*pos).BlackKingBb(), mg.MovesStruct().AttackedSqsBb()) {
 			*pos = (*pos).UnMakeMove()

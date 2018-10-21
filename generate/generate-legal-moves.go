@@ -25,12 +25,12 @@ func (mvs *LegalMoveGenerator) MovesStruct() *moves.Moves {
 }
 
 // NewLegalMoveGenerator exposes functionality to generate legal moves from a specific position
-func NewLegalMoveGenerator(pos *position.Position, ht *hashtables.HashTables) *LegalMoveGenerator {
+func NewLegalMoveGenerator(pos *position.Position) *LegalMoveGenerator {
 	resources := &LegalMoveGenerator{}
 	resources.movesList = moves.NewMovesList()
 	// moves.moves = make([][2]int, 0, 100)
 	resources.pos = pos
-	resources.ht = ht
+	resources.ht = hashtables.Lookup
 	return resources
 }
 
