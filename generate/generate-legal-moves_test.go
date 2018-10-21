@@ -296,3 +296,11 @@ func TestGenerateValidDiagonalSlidingMovesBb(t *testing.T) {
 	validMvsBb.Print()
 	assert.Equal(t, expectedValidMvsBb.Value(), validMvsBb.Value())
 }
+
+// func TestDifficultPerftPosition(t *testing.T) {
+// 	pos, _ := position.NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
+// 	mvs := NewLegalMoveGenerator(pos)
+// 	mvs.generateBishopMoves()
+// 	expectedMvs := [][]int{{63, 0}, {63, 9}, {63, 18}, {63, 27}, {63, 36}, {63, 45}, {63, 54}}
+// 	assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+// }

@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"fmt"
+
 	"github.com/tonyoreglia/glee/evaluate"
 	"github.com/tonyoreglia/glee/generate"
 	"github.com/tonyoreglia/glee/hashtables"
@@ -15,6 +17,11 @@ var ht = hashtables.Lookup
 func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) int {
 	var value, tempValue int
 	root := ply == depth
+	if root {
+		fmt.Println("")
+		fmt.Print("Perft Divide: ")
+		fmt.Println((*pos).GetFenString())
+	}
 	moveGenerator := generate.NewLegalMoveGenerator(*pos)
 	moveGenerator.GenerateMoves()
 	if ply == 0 {
@@ -25,8 +32,6 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 		mvList := moveGenerator.GetMovesList()
 		for _, move := range mvList {
 			(*pos).Move(move)
-			// fmt.Println("White Position")
-			(*pos).Print()
 			mg := generate.NewLegalMoveGenerator(*pos)
 			mg.GenerateMoves()
 			if (*pos).IsAttacked((*pos).WhiteKingBb(), mg.MovesStruct().AttackedSqsBb()) {
@@ -42,6 +47,8 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 				}
 			}
 			if root {
+				move.Print()
+				fmt.Println(*singlePlyPerft)
 				*perft += *singlePlyPerft
 				*singlePlyPerft = 0
 			}
@@ -67,6 +74,8 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 			}
 		}
 		if root {
+			move.Print()
+			fmt.Println(*singlePlyPerft)
 			*perft += *singlePlyPerft
 			*singlePlyPerft = 0
 		}

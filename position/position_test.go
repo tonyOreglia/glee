@@ -94,6 +94,5 @@ func TestPrintPos(t *testing.T) {
 	position.Print()
 	position, _ = NewPositionFen("7k/8/8/8/8/8/7p/6KR w q - 0 1")
 	position.Print()
-
 	assert.Equal(t, 1, 1)
 }

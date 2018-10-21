@@ -2,6 +2,8 @@ package moves
 
 import (
 	"fmt"
+
+	"github.com/tonyoreglia/glee/utility"
 )
 
 type Move struct {
@@ -43,5 +45,5 @@ func (m *Move) PromotionPiece() int {
 }
 
 func (m *Move) Print() {
-	fmt.Print(m)
+	fmt.Print(utility.ConvertIndexToAlgebraic(m.origin), " ", utility.ConvertIndexToAlgebraic(m.destination), ": ")
 }
