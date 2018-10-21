@@ -150,19 +150,30 @@ func (p *Position) promotePawn(sq int, piece int, sideToMove int) {
 
 func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 	p.previousPos = p.Copy()
+	// double pawn push move, set en passante
 	if p.bitboards[p.activeSide][Pawns].BitIsSet(originIndex) && terminusIndex-originIndex == -16 || terminusIndex-originIndex == 16 {
 		p.enPassanteSq = (terminusIndex-originIndex)/2 + originIndex
 	}
 	movingPiece := p.updateMovingSidesBbs(originIndex, terminusIndex)
+
+	if movingPiece == King {
+		diff := terminusIndex - originIndex
+		// king side castle move
+		if diff == 2 {
+			_ = p.updateMovingSidesBbs(terminusIndex+1, terminusIndex-1)
+		}
+		// queen side castle move
+		if diff == -2 {
+			_ = p.updateMovingSidesBbs(terminusIndex-2, terminusIndex+1)
+		}
+		p.revokeQueenSideCastlingRight()
+		p.revokeKingSideCastlingRight()
+	}
 	p.updatedOccupiedSqBitboard(p.activeSide)
 	p.switchActiveSide()
 	p.removeAttackedPieceFromBbs(terminusIndex)
 	if p.activeSide == Black {
 		p.moveCt++
-	}
-	if movingPiece == King {
-		p.revokeQueenSideCastlingRight()
-		p.revokeKingSideCastlingRight()
 	}
 	if movingPiece == Rooks {
 		if originIndex == 0 || originIndex == 56 {

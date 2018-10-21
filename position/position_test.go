@@ -89,6 +89,24 @@ func TestUnMakeMove(t *testing.T) {
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 }
 
+func TestCastling(t *testing.T) {
+	position, _ := NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
+	position.MakeMoveAlgebraic("e1", "g1", White)
+	assert.Equal(t, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R4RK1 b kq - 1 1", position.GetFenString())
+
+	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
+	position.MakeMoveAlgebraic("e1", "c1", White)
+	assert.Equal(t, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/2KR3R b kq - 1 1", position.GetFenString())
+
+	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")
+	position.MakeMoveAlgebraic("e8", "g8", Black)
+	assert.Equal(t, "r4rk1/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1", position.GetFenString())
+
+	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")
+	position.MakeMoveAlgebraic("e8", "c8", Black)
+	assert.Equal(t, "2kr3r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1", position.GetFenString())
+}
+
 func TestPrintPos(t *testing.T) {
 	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 	position.Print()
