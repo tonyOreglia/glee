@@ -1,4 +1,4 @@
-package generatemoves
+package engine
 
 import (
 	"testing"
@@ -16,8 +16,6 @@ func TestMinMax(t *testing.T) {
 	singlePlyPerft := 0
 	mv := new(moves.Move)
 	minMax(depth, depth, &pos, &mv, &perft, &singlePlyPerft)
-	// fmt.Println("Perft: ", perft)
-	// fmt.Print(mv)
 	assert.Equal(t, 20, perft)
 
 	// depth 2 starting position
@@ -26,8 +24,6 @@ func TestMinMax(t *testing.T) {
 	perft = 0
 	mv = new(moves.Move)
 	minMax(depth, depth, &pos, &mv, &perft, &singlePlyPerft)
-	// fmt.Println("Perft: ", perft)
-	// fmt.Print(mv)
 	assert.Equal(t, 400, perft)
 
 	// depth 3 starting position
@@ -36,8 +32,6 @@ func TestMinMax(t *testing.T) {
 	perft = 0
 	mv = new(moves.Move)
 	minMax(depth, depth, &pos, &mv, &perft, &singlePlyPerft)
-	// fmt.Println("Perft: ", perft)
-	// fmt.Print(mv)
 	assert.Equal(t, 8902, perft)
 
 	// good test position depth 1
@@ -46,8 +40,6 @@ func TestMinMax(t *testing.T) {
 	perft = 0
 	mv = new(moves.Move)
 	minMax(depth, depth, &pos, &mv, &perft, &singlePlyPerft)
-	// fmt.Println("Perft: ", perft)
-	// fmt.Print(mv)
 	assert.Equal(t, 48, perft)
 
 	// good test position depth 2
@@ -61,12 +53,17 @@ func TestMinMax(t *testing.T) {
 	// assert.Equal(t, 2039, perft)
 
 	// pawn promo testing
-	depth = 1
-	pos, _ = position.NewPositionFen("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1")
-	perft = 0
-	mv = new(moves.Move)
-	minMax(depth, depth, &pos, &mv, &perft, &singlePlyPerft)
-	// fmt.Println("Perft: ", perft)
-	// fmt.Print(mv)
-	assert.Equal(t, 24, perft)
+	// depth = 1
+	// pos, _ = position.NewPositionFen("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1")
+	// perft = 0
+	// mv = new(moves.Move)
+	// minMax(depth, depth, &pos, &mv, &perft, &singlePlyPerft)
+	// assert.Equal(t, 24, perft)
+
+	// depth = 2
+	// pos, _ = position.NewPositionFen("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1")
+	// perft = 0
+	// mv = new(moves.Move)
+	// minMax(depth, depth, &pos, &mv, &perft, &singlePlyPerft)
+	// assert.Equal(t, 496, perft)
 }

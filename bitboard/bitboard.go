@@ -119,7 +119,8 @@ func (b *Bitboard) Lsb() int {
 
 // Does not check that this bit is set as speed is priority.
 func (b *Bitboard) RemoveBit(pos int) error {
-	b.bitboard ^= 1 << uint(pos)
+	b.bitboard ^= 1 << uint64(pos)
+	// b.bitboard &= ^hashtables.SingleIndexBbHash[pos]
 	return nil
 }
 

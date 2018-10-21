@@ -17,7 +17,7 @@ func NewMove(singleMove []int) *Move {
 }
 
 func NewPromoMove(singleMove []int) *Move {
-	mv := &Move{singleMove[0], singleMove[1], singleMove[2]}
+	mv := &Move{origin: singleMove[0], destination: singleMove[1], promotion: singleMove[2]}
 	return mv
 }
 
@@ -26,11 +26,11 @@ func (m *Move) CopyMove() *Move {
 	return NewPromoMove(x)
 }
 
-func (m *Move) GetOrigin() int {
+func (m *Move) Origin() int {
 	return m.origin
 }
 
-func (m *Move) GetDestination() int {
+func (m *Move) Destination() int {
 	return m.destination
 }
 
@@ -38,7 +38,7 @@ func (m *Move) GetMoveSlice() []int {
 	return []int{m.origin, m.destination}
 }
 
-func (m *Move) GetPromoPiece() int {
+func (m *Move) PromotionPiece() int {
 	return m.promotion
 }
 

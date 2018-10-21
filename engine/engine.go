@@ -1,4 +1,4 @@
-package generatemoves
+package engine
 
 import (
 	"github.com/tonyoreglia/glee/evaluate"
@@ -24,9 +24,9 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 		value = -30000
 		mvList := moveGenerator.GetMovesList()
 		for _, move := range mvList {
-			// fmt.Printf("%p\n", pos)
-			// (*pos).Print()
-			(*pos).MakeMove(move.GetOrigin(), move.GetDestination(), (*pos).GetActiveSide())
+			(*pos).Move(move)
+			// fmt.Println("White Position")
+			(*pos).Print()
 			mg := generate.NewLegalMoveGenerator(*pos, ht)
 			mg.GenerateMoves()
 			if (*pos).IsAttacked((*pos).WhiteKingBb(), mg.MovesStruct().AttackedSqsBb()) {
@@ -35,8 +35,6 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 			}
 
 			tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
-			// fmt.Printf("%p\n", pos)
-			// (*pos).Print()
 			if tempValue > value {
 				value = tempValue
 				if root {
@@ -44,7 +42,6 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 				}
 			}
 			if root {
-				// fmt.Println("move: ", move, "-- perft: ", *singlePlyPerft)
 				*perft += *singlePlyPerft
 				*singlePlyPerft = 0
 			}
@@ -55,15 +52,13 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 	value = 30000
 	mvList := moveGenerator.GetMovesList()
 	for _, move := range mvList {
-		(*pos).MakeMove(move.GetOrigin(), move.GetDestination(), (*pos).GetActiveSide())
-		(*pos).Print()
+		(*pos).Move(move)
 		mg := generate.NewLegalMoveGenerator(*pos, ht)
 		mg.GenerateMoves()
 		if (*pos).IsAttacked((*pos).BlackKingBb(), mg.MovesStruct().AttackedSqsBb()) {
 			*pos = (*pos).UnMakeMove()
 			continue
 		}
-		// (*pos).Print()
 		tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
 		if tempValue < value {
 			value = tempValue
@@ -72,16 +67,11 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 			}
 		}
 		if root {
-			// fmt.Println("move: ", move, "-- perft: ", *singlePlyPerft)
 			*perft += *singlePlyPerft
 			*singlePlyPerft = 0
 		}
 		*pos = (*pos).UnMakeMove()
-		// (*pos).Print()
 	}
-	// fmt.Println("returning from black move gen")
-	// fmt.Printf("%p\n", pos)
-	// (*pos).Print()
 	return value
 }
 

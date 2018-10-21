@@ -162,7 +162,7 @@ func (mvs *LegalMoveGenerator) addPawnMovesToArray(shift int, shiftDirection int
 		origin := dest + shift
 		destBb := new(bitboard.Bitboard)
 		destBb.SetBit(dest)
-		if destBb.BitwiseAnd(promoRank).Value() != 0 {
+		if destBb.BitwiseAnd(promoRank).Value() != uint64(0) {
 			mvs.movesList.AddPromotionMove(origin, dest, position.Queen)
 			mvs.movesList.AddPromotionMove(origin, dest, position.Rooks)
 			mvs.movesList.AddPromotionMove(origin, dest, position.Knights)

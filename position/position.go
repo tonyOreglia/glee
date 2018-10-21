@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/tonyoreglia/glee/bitboard"
+	"github.com/tonyoreglia/glee/moves"
 )
 
 // White is the index of White's position bitboards in instance of Position Struct
@@ -30,11 +31,6 @@ const Bishops = 3
 const Knights = 4
 const Rooks = 5
 const Pawns = 6
-
-// may need to make this an array of bitboards whose index's are constants named by piece
-// type bitboards struct {
-// 	OccupiedSqs, King, Queen, Bishops, Knights, Rooks, Pawns bitboard.Bitboard
-// }
 
 // Position struct represents a static chess position
 type Position struct {
@@ -138,16 +134,43 @@ func (p *Position) UnMakeMove() *Position {
 	return p.previousPos
 }
 
-func (p *Position) MakeMove(originIndex int, terminusIndex int, activeSide int) {
+func (p *Position) Move(mv moves.Move) {
+	sideToMove := p.activeSide
+	p.MakeMove(mv.Origin(), mv.Destination())
+	if mv.PromotionPiece() != 0 {
+		p.promotePawn(mv.Destination(), mv.PromotionPiece(), sideToMove)
+	}
+}
+
+func (p *Position) promotePawn(sq int, piece int, sideToMove int) {
+	p.bitboards[sideToMove][piece].SetBit(sq)
+	p.bitboards[sideToMove][Pawns].RemoveBit(sq)
+	p.updatedOccupiedSqBitboard(sideToMove)
+}
+
+func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 	p.previousPos = p.Copy()
 	if p.bitboards[p.activeSide][Pawns].BitIsSet(originIndex) && terminusIndex-originIndex == -16 || terminusIndex-originIndex == 16 {
 		p.enPassanteSq = (terminusIndex-originIndex)/2 + originIndex
 	}
-	p.updateMovingSidesBbs(originIndex, terminusIndex, activeSide)
+	movingPiece := p.updateMovingSidesBbs(originIndex, terminusIndex)
+	p.updatedOccupiedSqBitboard(p.activeSide)
 	p.switchActiveSide()
-	p.removeAttackedPieceFromBbs(terminusIndex, p.activeSide)
+	p.removeAttackedPieceFromBbs(terminusIndex)
 	if p.activeSide == Black {
 		p.moveCt++
+	}
+	if movingPiece == King {
+		p.revokeQueenSideCastlingRight()
+		p.revokeKingSideCastlingRight()
+	}
+	if movingPiece == Rooks {
+		if originIndex == 0 || originIndex == 56 {
+			p.revokeQueenSideCastlingRight()
+		}
+		if originIndex == 7 || originIndex == 63 {
+			p.revokeKingSideCastlingRight()
+		}
 	}
 }
 
@@ -155,7 +178,9 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int, activeSide int) 
 func (p *Position) MakeMoveAlgebraic(origin string, terminus string, activeSide int) {
 	originIndex := convertAlgebriacToIndex(origin)
 	terminusIndex := convertAlgebriacToIndex(terminus)
-	p.MakeMove(originIndex, terminusIndex, activeSide)
+	// mv := moves.NewMove([]int{originIndex, terminusIndex})
+	// p.Move(*mv)
+	p.MakeMove(originIndex, terminusIndex)
 }
 
 func (p *Position) IsAttacked(kingBb bitboard.Bitboard, destSqsBb bitboard.Bitboard) bool {
@@ -170,46 +195,52 @@ func (p *Position) switchActiveSide() {
 	}
 }
 
-func (p *Position) removeAttackedPieceFromBbs(terminus int, side int) {
+func (p *Position) removeAttackedPieceFromBbs(terminus int) {
 	switch {
-	case p.bitboards[side][Pawns].BitIsSet(terminus):
-		p.bitboards[side][Pawns].RemoveBit(terminus)
-	case p.bitboards[side][Rooks].BitIsSet(terminus):
-		p.bitboards[side][Rooks].RemoveBit(terminus)
-	case p.bitboards[side][Knights].BitIsSet(terminus):
-		p.bitboards[side][Knights].RemoveBit(terminus)
-	case p.bitboards[side][Bishops].BitIsSet(terminus):
-		p.bitboards[side][Bishops].RemoveBit(terminus)
-	case p.bitboards[side][Queen].BitIsSet(terminus):
-		p.bitboards[side][Queen].RemoveBit(terminus)
-	case p.bitboards[side][King].BitIsSet(terminus):
-		p.bitboards[side][King].RemoveBit(terminus)
+	case p.bitboards[p.activeSide][Pawns].BitIsSet(terminus):
+		p.bitboards[p.activeSide][Pawns].RemoveBit(terminus)
+	case p.bitboards[p.activeSide][Rooks].BitIsSet(terminus):
+		p.bitboards[p.activeSide][Rooks].RemoveBit(terminus)
+	case p.bitboards[p.activeSide][Knights].BitIsSet(terminus):
+		p.bitboards[p.activeSide][Knights].RemoveBit(terminus)
+	case p.bitboards[p.activeSide][Bishops].BitIsSet(terminus):
+		p.bitboards[p.activeSide][Bishops].RemoveBit(terminus)
+	case p.bitboards[p.activeSide][Queen].BitIsSet(terminus):
+		p.bitboards[p.activeSide][Queen].RemoveBit(terminus)
+	case p.bitboards[p.activeSide][King].BitIsSet(terminus):
+		p.bitboards[p.activeSide][King].RemoveBit(terminus)
 	}
-	p.updatedOccupiedSqBitboard(side)
+	p.updatedOccupiedSqBitboard(p.activeSide)
 }
 
-func (p *Position) updateMovingSidesBbs(origin int, terminus int, activeSide int) {
+func (p *Position) updateMovingSidesBbs(origin int, terminus int) int {
 	switch {
-	case p.bitboards[activeSide][Pawns].BitIsSet(origin):
-		p.bitboards[activeSide][Pawns].SetBit(terminus)
-		p.bitboards[activeSide][Pawns].RemoveBit(origin)
-	case p.bitboards[activeSide][Rooks].BitIsSet(origin):
-		p.bitboards[activeSide][Rooks].SetBit(terminus)
-		p.bitboards[activeSide][Rooks].RemoveBit(origin)
-	case p.bitboards[activeSide][Knights].BitIsSet(origin):
-		p.bitboards[activeSide][Knights].SetBit(terminus)
-		p.bitboards[activeSide][Knights].RemoveBit(origin)
-	case p.bitboards[activeSide][Bishops].BitIsSet(origin):
-		p.bitboards[activeSide][Bishops].SetBit(terminus)
-		p.bitboards[activeSide][Bishops].RemoveBit(origin)
-	case p.bitboards[activeSide][Queen].BitIsSet(origin):
-		p.bitboards[activeSide][Queen].SetBit(terminus)
-		p.bitboards[activeSide][Queen].RemoveBit(origin)
-	case p.bitboards[activeSide][King].BitIsSet(origin):
-		p.bitboards[activeSide][King].SetBit(terminus)
-		p.bitboards[activeSide][King].RemoveBit(origin)
+	case p.bitboards[p.activeSide][Pawns].BitIsSet(origin):
+		p.bitboards[p.activeSide][Pawns].SetBit(terminus)
+		p.bitboards[p.activeSide][Pawns].RemoveBit(origin)
+		return Pawns
+	case p.bitboards[p.activeSide][Rooks].BitIsSet(origin):
+		p.bitboards[p.activeSide][Rooks].SetBit(terminus)
+		p.bitboards[p.activeSide][Rooks].RemoveBit(origin)
+		return Rooks
+	case p.bitboards[p.activeSide][Knights].BitIsSet(origin):
+		p.bitboards[p.activeSide][Knights].SetBit(terminus)
+		p.bitboards[p.activeSide][Knights].RemoveBit(origin)
+		return Knights
+	case p.bitboards[p.activeSide][Bishops].BitIsSet(origin):
+		p.bitboards[p.activeSide][Bishops].SetBit(terminus)
+		p.bitboards[p.activeSide][Bishops].RemoveBit(origin)
+		return Bishops
+	case p.bitboards[p.activeSide][Queen].BitIsSet(origin):
+		p.bitboards[p.activeSide][Queen].SetBit(terminus)
+		p.bitboards[p.activeSide][Queen].RemoveBit(origin)
+		return Queen
+	case p.bitboards[p.activeSide][King].BitIsSet(origin):
+		p.bitboards[p.activeSide][King].SetBit(terminus)
+		p.bitboards[p.activeSide][King].RemoveBit(origin)
+		return King
 	}
-	p.updatedOccupiedSqBitboard(activeSide)
+	return 0
 }
 
 // GetFenString converts position instance to it's Forsyth–Edwards Notation string
@@ -265,6 +296,20 @@ func (p *Position) convertActiveSideToString() (string, error) {
 
 func (p *Position) setActiveSide(activeSide int) {
 	p.activeSide = activeSide
+}
+
+func (p *Position) revokeQueenSideCastlingRight() {
+	if p.activeSide == White && p.castlingRights[White].BitIsNotSet(WhiteKingSideCastlingRightsBit) {
+		p.castlingRights[p.activeSide].RemoveBit(WhiteQueenSideCastlingRightsBit)
+	}
+	p.castlingRights[p.activeSide].RemoveBit(BlackQueenSideCastlingRightsBit)
+}
+
+func (p *Position) revokeKingSideCastlingRight() {
+	if p.activeSide == White {
+		p.castlingRights[p.activeSide].RemoveBit(WhiteKingSideCastlingRightsBit)
+	}
+	p.castlingRights[p.activeSide].RemoveBit(BlackKingSideCastlingRightsBit)
 }
 
 func (p *Position) setCastlingRightsFromFen(castlingRights string) {
@@ -481,57 +526,6 @@ func (p *Position) updatedOccupiedSqBitboard(activeSide int) {
 			p.bitboards[activeSide][King].Value() |
 			p.bitboards[activeSide][Queen].Value())
 }
-
-// func convertSingleBbIndexToFen(i int, j int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
-// 	index := int(j*8 + i)
-// 	switch {
-// 	case bb[White][King].BitIsSet(index):
-// 		*fenString += "K"
-// 		*emptySqs = 0
-// 	case bb[White][Queen].BitIsSet(index):
-// 		*fenString += "Q"
-// 		*emptySqs = 0
-// 	case bb[White][Bishops].BitIsSet(index):
-// 		*fenString += "B"
-// 		*emptySqs = 0
-// 	case bb[White][Rooks].BitIsSet(index):
-// 		*fenString += "R"
-// 		*emptySqs = 0
-// 	case bb[White][Knights].BitIsSet(index):
-// 		*fenString += "N"
-// 		*emptySqs = 0
-// 	case bb[White][Pawns].BitIsSet(index):
-// 		*fenString += "P"
-// 		*emptySqs = 0
-// 	case bb[Black][King].BitIsSet(index):
-// 		*fenString += "k"
-// 		*emptySqs = 0
-// 	case bb[Black][Queen].BitIsSet(index):
-// 		*fenString += "q"
-// 		*emptySqs = 0
-// 	case bb[Black][Bishops].BitIsSet(index):
-// 		*fenString += "b"
-// 		*emptySqs = 0
-// 	case bb[Black][Rooks].BitIsSet(index):
-// 		*fenString += "r"
-// 		*emptySqs = 0
-// 	case bb[Black][Knights].BitIsSet(index):
-// 		*fenString += "n"
-// 		*emptySqs = 0
-// 	case bb[Black][Pawns].BitIsSet(index):
-// 		*fenString += "p"
-// 		*emptySqs = 0
-// 	default:
-// 		*emptySqs++
-// 		nextWhiteSqOcc := bb[White][OccupiedSqs].BitIsSet(index + 1)
-// 		nexBlackSqOcc := bb[Black][OccupiedSqs].BitIsSet(index + 1)
-// 		nextSqOcc := nextWhiteSqOcc || nexBlackSqOcc
-// 		notHFile := i != 7
-// 		if nextSqOcc && notHFile {
-// 			*fenString += strconv.Itoa(*emptySqs)
-// 		}
-// 	}
-// }
 
 func convertSingleBbRowToFenString(rank int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
 	for file := int(0); file < 8; file++ {

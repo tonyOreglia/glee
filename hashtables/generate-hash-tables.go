@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/tonyoreglia/glee/bitboard"
 )
+
+var Lookup = CalculateAllLookupBbs()
 
 // HashTables holds bitoard lookup tables used in move generation
 type HashTables struct {
@@ -311,11 +311,15 @@ func PrintAllBitboards(ht *HashTables) {
 }
 
 func printBitBoard(f *os.File, bb uint64) {
-	bitboard, _ := bitboard.NewBitboard(bb)
+	// bitboard, _ := bitboard.NewBitboard(bb)
 	nl := []byte("\n")
 	f.Write(nl)
+	val := 0
 	for i := 0; i < 64; i++ {
-		b := []byte(strconv.Itoa(int(bitboard.GetBitValue(i))))
+		if ((uint64(1) << uint(i)) & bb) != uint64(0) {
+			val = 1
+		}
+		b := []byte(strconv.Itoa(int(val)))
 		f.Write(b)
 		if ((i + 1) % 8) == 0 {
 			f.Write(nl)

@@ -36,7 +36,7 @@ func (m *Moves) AddMoveFromSlice(singleMove []int) {
 }
 
 func (m *Moves) AddPromotionMove(origin int, dest int, promo int) {
-	mv := NewMove([]int{origin, dest, promo})
+	mv := NewPromoMove([]int{origin, dest, promo})
 	m.mvs = append(m.mvs, *mv)
 }
 
@@ -74,7 +74,7 @@ func (m *Moves) GetMoves() [][]int {
 func (m *Moves) GetBitboard() *bitboard.Bitboard {
 	bitboard := &bitboard.Bitboard{}
 	for _, v := range m.mvs {
-		bitboard.SetBit(v.GetDestination())
+		bitboard.SetBit(v.Destination())
 	}
 	return bitboard
 }
