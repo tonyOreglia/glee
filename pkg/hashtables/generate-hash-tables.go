@@ -38,10 +38,16 @@ type HashTables struct {
 	KnightAttackBbHash                  [64]uint64
 	LegalKingMovesBbHash                [2][64]uint64
 	LegalPawnMovesBbHash                [2][64]uint64
+	LookupCastlingSlidingSqByDest       map[uint64]uint64
 }
 
 func CalculateAllLookupBbs() *HashTables {
 	hashTables := new(HashTables)
+	hashTables.LookupCastlingSlidingSqByDest = make(map[uint64]uint64)
+	hashTables.LookupCastlingSlidingSqByDest[uint64(62)] = uint64(61)
+	hashTables.LookupCastlingSlidingSqByDest[uint64(58)] = uint64(59)
+	hashTables.LookupCastlingSlidingSqByDest[uint64(6)] = uint64(5)
+	hashTables.LookupCastlingSlidingSqByDest[uint64(2)] = uint64(3)
 	hashTables.AfileBb = 0x101010101010101
 	hashTables.BfileBb = hashTables.AfileBb << 1
 	hashTables.CfileBb = hashTables.AfileBb << 2

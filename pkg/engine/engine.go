@@ -2,7 +2,9 @@ package engine
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/tonyoreglia/glee/bitboard"
 	"github.com/tonyoreglia/glee/evaluate"
 	"github.com/tonyoreglia/glee/generate"
 	"github.com/tonyoreglia/glee/hashtables"
@@ -13,6 +15,65 @@ import (
 // const Depth = 1
 
 var ht = hashtables.Lookup
+
+func castlingMoveIsValid(move moves.Move, value *int, tempValue *int, root bool, depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) bool {
+	tempPos := *pos
+	*pos = (*pos).UnMakeMove()
+	mg := generate.NewLegalMoveGenerator(*pos)
+	mg.GenerateMoves()
+	castlingSlidingSqBb, err := bitboard.NewBitboard(uint64(0))
+	castlingSlidingSqBb.SetBit(int(ht.LookupCastlingSlidingSqByDest[uint64(move.Destination())]))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	if (*pos).IsAttacked(*castlingSlidingSqBb, mg.MovesStruct().AttackedSqsBb()) {
+		*pos = tempPos
+		return false
+	}
+	*pos = tempPos
+	return true
+}
+
+func evaluateMove(move moves.Move, value *int, tempValue *int, root bool, depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) error {
+	var mg *generate.LegalMoveGenerator
+	if (*pos).IsCastlingMove(move) {
+		if !castlingMoveIsValid(move, value, tempValue, root, depth, ply, pos, engineMove, perft, singlePlyPerft) {
+			return nil
+		}
+	}
+	(*pos).Move(move)
+	mg = generate.NewLegalMoveGenerator(*pos)
+	mg.GenerateMoves()
+	if (*pos).IsAttacked((*pos).InactiveSideKingBb(), mg.MovesStruct().AttackedSqsBb()) {
+		*pos = (*pos).UnMakeMove()
+		return nil
+	}
+	*tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
+	if *tempValue > *value {
+		value = tempValue
+		if root {
+			*engineMove = move.CopyMove()
+		}
+	}
+	if root {
+		move.Print()
+		fmt.Println(*singlePlyPerft)
+		*perft += *singlePlyPerft
+		*singlePlyPerft = 0
+	}
+	*pos = (*pos).UnMakeMove()
+	return nil
+}
+
+func generateMoves(value *int, tempValue *int, root bool, depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) error {
+	moveGenerator := generate.NewLegalMoveGenerator(*pos)
+	moveGenerator.GenerateMoves()
+	mvList := moveGenerator.GetMovesList()
+	for _, move := range mvList {
+		evaluateMove(move, value, tempValue, root, depth, ply, pos, engineMove, perft, singlePlyPerft)
+	}
+	return nil
+}
 
 func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) int {
 	var value, tempValue int
@@ -29,58 +90,11 @@ func minMax(depth int, ply int, pos **position.Position, engineMove **moves.Move
 	}
 	if (*pos).IsWhitesTurn() {
 		value = -30000
-		mvList := moveGenerator.GetMovesList()
-		for _, move := range mvList {
-			(*pos).Move(move)
-			mg := generate.NewLegalMoveGenerator(*pos)
-			mg.GenerateMoves()
-			if (*pos).IsAttacked((*pos).WhiteKingBb(), mg.MovesStruct().AttackedSqsBb()) {
-				*pos = (*pos).UnMakeMove()
-				continue
-			}
-
-			tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
-			if tempValue > value {
-				value = tempValue
-				if root {
-					*engineMove = move.CopyMove()
-				}
-			}
-			if root {
-				move.Print()
-				fmt.Println(*singlePlyPerft)
-				*perft += *singlePlyPerft
-				*singlePlyPerft = 0
-			}
-			*pos = (*pos).UnMakeMove()
-		}
+		generateMoves(&value, &tempValue, root, depth, ply, pos, engineMove, perft, singlePlyPerft)
 		return value
 	}
 	value = 30000
-	mvList := moveGenerator.GetMovesList()
-	for _, move := range mvList {
-		(*pos).Move(move)
-		mg := generate.NewLegalMoveGenerator(*pos)
-		mg.GenerateMoves()
-		if (*pos).IsAttacked((*pos).BlackKingBb(), mg.MovesStruct().AttackedSqsBb()) {
-			*pos = (*pos).UnMakeMove()
-			continue
-		}
-		tempValue = minMax(depth, ply-1, pos, engineMove, perft, singlePlyPerft)
-		if tempValue < value {
-			value = tempValue
-			if root {
-				*engineMove = move.CopyMove()
-			}
-		}
-		if root {
-			move.Print()
-			fmt.Println(*singlePlyPerft)
-			*perft += *singlePlyPerft
-			*singlePlyPerft = 0
-		}
-		*pos = (*pos).UnMakeMove()
-	}
+	generateMoves(&value, &tempValue, root, depth, ply, pos, engineMove, perft, singlePlyPerft)
 	return value
 }
 

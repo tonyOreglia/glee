@@ -10,8 +10,11 @@ import (
 	"strings"
 
 	"github.com/tonyoreglia/glee/bitboard"
+	"github.com/tonyoreglia/glee/hashtables"
 	"github.com/tonyoreglia/glee/moves"
 )
+
+var ht = hashtables.Lookup
 
 // White is the index of White's position bitboards in instance of Position Struct
 const White = 0
@@ -114,6 +117,13 @@ func (p *Position) ActiveSideKingBb() bitboard.Bitboard {
 	return p.bitboards[p.activeSide][King]
 }
 
+func (p *Position) InactiveSideKingBb() bitboard.Bitboard {
+	if p.activeSide == White {
+		return p.bitboards[Black][King]
+	}
+	return p.bitboards[White][King]
+}
+
 func (p *Position) WhiteKingBb() bitboard.Bitboard {
 	return p.bitboards[White][King]
 }
@@ -189,13 +199,29 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 func (p *Position) MakeMoveAlgebraic(origin string, terminus string, activeSide int) {
 	originIndex := convertAlgebriacToIndex(origin)
 	terminusIndex := convertAlgebriacToIndex(terminus)
-	// mv := moves.NewMove([]int{originIndex, terminusIndex})
-	// p.Move(*mv)
 	p.MakeMove(originIndex, terminusIndex)
 }
 
 func (p *Position) IsAttacked(kingBb bitboard.Bitboard, destSqsBb bitboard.Bitboard) bool {
 	return kingBb.BitwiseAnd(&destSqsBb).Value() != uint64(0)
+}
+
+func (p *Position) IsCastlingMove(mv moves.Move) bool {
+	if p.IsKingMove(mv) {
+		if (mv.Destination()-mv.Origin() == 2) || (mv.Destination()-mv.Origin() == -2) {
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Position) IsKingMove(mv moves.Move) bool {
+	activeSideKingBb := p.ActiveSideKingBb()
+	originBb, e := bitboard.NewBitboard(ht.SingleIndexBbHash[mv.Origin()])
+	if e != nil {
+		fmt.Errorf(e.Error())
+	}
+	return bitboard.ReturnBitwiseAnd(&activeSideKingBb, originBb).Value() != uint64(0)
 }
 
 func (p *Position) switchActiveSide() {

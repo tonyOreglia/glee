@@ -84,8 +84,6 @@ func (mvs *LegalMoveGenerator) generateKingMoves() {
 	finalRankBb, _ := bitboard.NewBitboard(mvs.ht.EighthRankBb | mvs.ht.FirstRankBb)
 	var validMovesBb *bitboard.Bitboard
 
-	// check if castling moves blocked
-
 	if bitboard.ReturnBitwiseAnd(finalRankBb, &kingBb).Value() != 0 {
 		validMovesBb = generateValidDirectionalMovesBb(kingPosition, mvs.ht.EastArrayBbHash, occSqsBb, getLsb).
 			Combine(generateValidDirectionalMovesBb(kingPosition, mvs.ht.WestArrayBbHash, occSqsBb, getMsb)).

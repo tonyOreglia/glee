@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/tonyoreglia/glee/moves"
 )
 
 func TestConvertAlgebriacToIndex(t *testing.T) {
@@ -113,4 +114,26 @@ func TestPrintPos(t *testing.T) {
 	position, _ = NewPositionFen("7k/8/8/8/8/8/7p/6KR w q - 0 1")
 	position.Print()
 	assert.Equal(t, 1, 1)
+}
+
+func TestIsCastlingMove(t *testing.T) {
+	position, _ := NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
+	mv := moves.NewMove([]int{60, 62})
+	assert.True(t, position.IsCastlingMove(*mv))
+
+	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
+	mv = moves.NewMove([]int{60, 58})
+	assert.True(t, position.IsCastlingMove(*mv))
+
+	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")
+	mv = moves.NewMove([]int{4, 2})
+	assert.True(t, position.IsCastlingMove(*mv))
+
+	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")
+	mv = moves.NewMove([]int{4, 6})
+	assert.True(t, position.IsCastlingMove(*mv))
+
+	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
+	mv = moves.NewMove([]int{60, 61})
+	assert.False(t, position.IsCastlingMove(*mv))
 }

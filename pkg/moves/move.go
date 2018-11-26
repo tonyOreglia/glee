@@ -45,5 +45,5 @@ func (m *Move) PromotionPiece() int {
 }
 
 func (m *Move) Print() {
-	fmt.Print(utility.ConvertIndexToAlgebraic(m.origin), " ", utility.ConvertIndexToAlgebraic(m.destination), ": ")
+	fmt.Print(utility.ConvertIndexToAlgebraic(m.origin), utility.ConvertIndexToAlgebraic(m.destination), " ")
 }
