@@ -34,6 +34,9 @@ func NewLegalMoveGenerator(pos *position.Position) *LegalMoveGenerator {
 	return resources
 }
 
+// GenerateMoves generates a list of pseudo legal moves for a given postion.
+// Moves that expose the moving sides king to check may be included in the move list.
+// This condition is checked for by the engine when thinking.
 func (mvs *LegalMoveGenerator) GenerateMoves() {
 	mvs.generatePawnMoves()
 	mvs.generateKingMoves()
