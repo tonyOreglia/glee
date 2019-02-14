@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tonyoreglia/glee/position"
+	"github.com/tonyOreglia/glee/pkg/position"
 )
 
 func TestEvaluatePosition(t *testing.T) {

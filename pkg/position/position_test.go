@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tonyoreglia/glee/moves"
+	"github.com/tonyOreglia/glee/pkg/moves"
 )
 
 func TestConvertAlgebriacToIndex(t *testing.T) {
