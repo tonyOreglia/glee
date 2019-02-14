@@ -3,10 +3,10 @@
 package generate
 
 import (
-	"github.com/tonyoreglia/glee/bitboard"
-	"github.com/tonyoreglia/glee/hashtables"
-	"github.com/tonyoreglia/glee/moves"
-	"github.com/tonyoreglia/glee/position"
+	"github.com/tonyOreglia/glee/pkg/bitboard"
+	"github.com/tonyOreglia/glee/pkg/hashtables"
+	"github.com/tonyOreglia/glee/pkg/moves"
+	"github.com/tonyOreglia/glee/pkg/position"
 )
 
 // LegalMoveGenerator stores the legal moves from a given position

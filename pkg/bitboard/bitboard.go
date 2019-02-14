@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/bits"
 
-	ht "github.com/tonyoreglia/glee/hashtables"
+	ht "github.com/tonyOreglia/glee/pkg/hashtables"
 )
 
 // Bitboard struct exposes uint64 "bitboard" with associated getter, setter, and helper fxns

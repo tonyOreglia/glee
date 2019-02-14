@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tonyoreglia/glee/bitboard"
-	"github.com/tonyoreglia/glee/hashtables"
-	"github.com/tonyoreglia/glee/position"
+	"github.com/tonyOreglia/glee/pkg/bitboard"
+	"github.com/tonyOreglia/glee/pkg/hashtables"
+	"github.com/tonyOreglia/glee/pkg/position"
 )
 
 // var ht = hashtables.CalculateAllLookupBbs()

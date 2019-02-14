@@ -3,7 +3,7 @@ package moves
 import (
 	"fmt"
 
-	"github.com/tonyoreglia/glee/bitboard"
+	"github.com/tonyOreglia/glee/pkg/bitboard"
 )
 
 const MoveListSize = 100

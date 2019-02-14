@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/tonyoreglia/glee/bitboard"
-	"github.com/tonyoreglia/glee/evaluate"
-	"github.com/tonyoreglia/glee/generate"
-	"github.com/tonyoreglia/glee/hashtables"
-	"github.com/tonyoreglia/glee/moves"
-	"github.com/tonyoreglia/glee/position"
+	"github.com/tonyOreglia/glee/pkg/bitboard"
+	"github.com/tonyOreglia/glee/pkg/evaluate"
+	"github.com/tonyOreglia/glee/pkg/generate"
+	"github.com/tonyOreglia/glee/pkg/hashtables"
+	"github.com/tonyOreglia/glee/pkg/moves"
+	"github.com/tonyOreglia/glee/pkg/position"
 )
 
 // const Depth = 1

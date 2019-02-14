@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tonyoreglia/glee/bitboard"
-	"github.com/tonyoreglia/glee/hashtables"
-	"github.com/tonyoreglia/glee/moves"
+	"github.com/tonyOreglia/glee/pkg/bitboard"
+	"github.com/tonyOreglia/glee/pkg/hashtables"
+	"github.com/tonyOreglia/glee/pkg/moves"
 )
 
 var ht = hashtables.Lookup

@@ -3,7 +3,7 @@ package moves
 import (
 	"fmt"
 
-	"github.com/tonyoreglia/glee/utility"
+	"github.com/tonyOreglia/glee/pkg/utility"
 )
 
 type Move struct {

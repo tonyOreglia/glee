@@ -1,7 +1,7 @@
 package evaluate
 
 import (
-	"github.com/tonyoreglia/glee/position"
+	"github.com/tonyOreglia/glee/pkg/position"
 )
 
 func EvaluatePosition(pos *position.Position, perft *int) int {

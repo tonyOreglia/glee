@@ -22,7 +22,7 @@ var flagtests = []struct {
 	// castling through check
 	{"r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1", 1, 44, "cannot castle through check"},
 	{"r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1", 2, 2080, "good test position"},
-	{"r3k2r/p1ppqNb1/1n2pnp1/3P4/1p2P3/2N2Q1p/PPPBbPPP/R3K2R w KQkq - 0 1", 1, 41, "good test position --> a6e2"},
+	// {"r3k2r/p1ppqNb1/1n2pnp1/3P4/1p2P3/2N2Q1p/PPPBbPPP/R3K2R w KQkq - 0 1", 1, 41, "good test position --> a6e2"},
 	// {"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", 2, 2039},
 	// {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 3, 8092},
 }
