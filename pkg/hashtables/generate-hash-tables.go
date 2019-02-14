@@ -37,6 +37,8 @@ type HashTables struct {
 	SouthWestArrayBbHash                [64]uint64
 	KnightAttackBbHash                  [64]uint64
 	LegalKingMovesBbHash                [2][64]uint64
+	LegalKingMovesNoCastlingBbHash      [64]uint64
+	CastlingBits                        [2]uint64
 	LegalPawnMovesBbHash                [2][64]uint64
 	LookupCastlingSlidingSqByDest       map[uint64]uint64
 }
@@ -74,10 +76,19 @@ func CalculateAllLookupBbs() *HashTables {
 		hashTables.SouthWestArrayBbHash[index] = uint64(0)
 		hashTables.KnightAttackBbHash[index] = uint64(0)
 	}
+
 	generateSingleBitLookup(hashTables)
 	generateArrayBitboardLookup(hashTables)
 	generateEnPassantBitboardLookup(hashTables)
+
+	hashTables.CastlingBits[0] = 0
+	hashTables.CastlingBits[0] |= hashTables.SingleIndexBbHash[62] | hashTables.SingleIndexBbHash[58]
+
+	hashTables.CastlingBits[1] = 0
+	hashTables.CastlingBits[1] |= hashTables.SingleIndexBbHash[2] | hashTables.SingleIndexBbHash[6]
+
 	// PrintAllBitboards(hashTables)
+	// PrintAllBitboardValues(hashTables)
 	return hashTables
 }
 
@@ -172,31 +183,41 @@ func generateArrayBitboardLookup(ht *HashTables) {
 		}
 
 		ht.LegalKingMovesBbHash[1][index] = 0
+		ht.LegalKingMovesNoCastlingBbHash[index] = 0
 		if index != 63 {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+1]
+			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index+1]
 		}
 		if index != 0 {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-1]
+			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index-1]
 		}
 		if index <= 55 {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+8]
+			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index+8]
 		}
 		if index >= 8 {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-8]
+			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index-8]
 		}
 		if index <= 54 {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+9]
+			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index+9]
 		}
 		if index >= 9 {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-9]
+			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index-9]
 		}
 		if index <= 56 {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index+7]
+			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index+7]
 		}
 		if index >= 7 {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-7]
+			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index-7]
 		}
 		ht.LegalKingMovesBbHash[0][index] = ht.LegalKingMovesBbHash[1][index]
+		// removing overflow from a file to h file
 		if ht.SingleIndexBbHash[index]&ht.AfileBb != 0 {
 			ht.LegalKingMovesBbHash[1][index] &= ^ht.HfileBb
 			ht.LegalKingMovesBbHash[0][index] &= ^ht.HfileBb
@@ -205,6 +226,7 @@ func generateArrayBitboardLookup(ht *HashTables) {
 			ht.LegalKingMovesBbHash[1][index] &= ^ht.AfileBb
 			ht.LegalKingMovesBbHash[0][index] &= ^ht.AfileBb
 		}
+
 		if index == 4 {
 			ht.LegalKingMovesBbHash[1][4] |= ht.SingleIndexBbHash[2] | ht.SingleIndexBbHash[6]
 		}
@@ -259,28 +281,28 @@ func PrintAllBitboards(ht *HashTables) {
 	f, _ := os.Create("hash-tables.txt")
 	defer f.Close()
 	f.Write([]byte("\tA FILE"))
-	f.Write([]byte(strconv.Itoa(int(ht.AfileBb))))
+	// f.Write([]byte(strconv.Itoa(int(ht.AfileBb))))
 	printBitBoard(f, ht.AfileBb)
 	f.Write([]byte("\tB FILE:"))
-	f.Write([]byte(strconv.Itoa(int(ht.BfileBb))))
+	// f.Write([]byte(strconv.Itoa(int(ht.BfileBb))))
 	printBitBoard(f, ht.BfileBb)
 	f.Write([]byte("\tC FILE:"))
-	f.Write([]byte(strconv.Itoa(int(ht.CfileBb))))
+	// f.Write([]byte(strconv.Itoa(int(ht.CfileBb))))
 	printBitBoard(f, ht.CfileBb)
 	f.Write([]byte("\tD FILE:"))
-	f.Write([]byte(strconv.Itoa(int(ht.DfileBb))))
+	// f.Write([]byte(strconv.Itoa(int(ht.DfileBb))))
 	printBitBoard(f, ht.DfileBb)
 	f.Write([]byte("\tE FILE:"))
-	f.Write([]byte(strconv.Itoa(int(ht.EfileBb))))
+	// f.Write([]byte(strconv.Itoa(int(ht.EfileBb))))
 	printBitBoard(f, ht.EfileBb)
 	f.Write([]byte("\tF FILE:"))
-	f.Write([]byte(strconv.Itoa(int(ht.FfileBb))))
+	// f.Write([]byte(strconv.Itoa(int(ht.FfileBb))))
 	printBitBoard(f, ht.FfileBb)
 	f.Write([]byte("\tG FILE:"))
-	f.Write([]byte(strconv.Itoa(int(ht.GfileBb))))
+	// f.Write([]byte(strconv.Itoa(int(ht.GfileBb))))
 	printBitBoard(f, ht.GfileBb)
 	f.Write([]byte("\tH FILE:"))
-	f.Write([]byte(strconv.Itoa(int(ht.HfileBb))))
+	// f.Write([]byte(strconv.Itoa(int(ht.HfileBb))))
 	printBitBoard(f, ht.HfileBb)
 	for i := 0; i < 64; i++ {
 		f.Write([]byte("\tBITBOARD LOOKUP:"))
@@ -306,6 +328,8 @@ func PrintAllBitboards(ht *HashTables) {
 		f.Write([]byte("\tKING MOVES:"))
 		printBitBoard(f, ht.LegalKingMovesBbHash[0][i])
 		printBitBoard(f, ht.LegalKingMovesBbHash[1][i])
+		f.Write([]byte("\tKING MOVES NO CASTLE:"))
+		printBitBoard(f, ht.LegalKingMovesNoCastlingBbHash[i])
 		f.Write([]byte("\tPAWN MOVES:"))
 		printBitBoard(f, ht.LegalPawnMovesBbHash[0][i])
 		printBitBoard(f, ht.LegalPawnMovesBbHash[1][i])
@@ -318,19 +342,26 @@ func PrintAllBitboards(ht *HashTables) {
 
 func printBitBoard(f *os.File, bb uint64) {
 	// bitboard, _ := bitboard.NewBitboard(bb)
+	// bitboard.Print()
 	nl := []byte("\n")
 	f.Write(nl)
-	val := 0
-	for i := 0; i < 64; i++ {
-		if ((uint64(1) << uint(i)) & bb) != uint64(0) {
+	var val int
+	for i := uint(0); i < 64; i++ {
+		val = 0
+		if bitIsSet(i, bb) {
 			val = 1
 		}
 		b := []byte(strconv.Itoa(int(val)))
 		f.Write(b)
-		if ((i + 1) % 8) == 0 {
+		j := i
+		if ((j + 1) % 8) == 0 {
 			f.Write(nl)
 		}
 	}
 	f.Write(nl)
 	f.Write(nl)
+}
+
+func bitIsSet(bit uint, bb uint64) bool {
+	return ((uint64(1) << bit) & bb) != uint64(0)
 }

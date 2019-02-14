@@ -52,11 +52,7 @@ King
  - game over if attacked and no safe square to move to or possibility to block or take attacker 
 
 
-How does this Chess engine calculate moves? 
-  mvs.generatePawnMoves()
-	mvs.generateKingMoves()
-	mvs.generateQueenMoves()
-	mvs.generateRookMoves()
-	mvs.generateKnightMoves()
-	mvs.generateBishopMoves()
+Refactoring 
+ - move generator should not be a class. It should just accepts a postion and return the moves
+ - hashtables should be generated once at the beginning and passed around by reference
 

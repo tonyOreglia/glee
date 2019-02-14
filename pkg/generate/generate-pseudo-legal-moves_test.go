@@ -4,298 +4,515 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tonyOreglia/glee/pkg/bitboard"
 	"github.com/tonyOreglia/glee/pkg/hashtables"
+	"github.com/tonyOreglia/glee/pkg/moves"
 	"github.com/tonyOreglia/glee/pkg/position"
 )
+
+var ht = hashtables.Lookup
 
 func TestGenerateMoves(t *testing.T) {
 	tests := map[string]struct {
 		pos           string
-		generateMoves func(*LegalMoveGenerator)
-		assertion     func(*LegalMoveGenerator)
+		generateMoves func(*position.Position) *moves.Moves
+		assertion     func(*moves.Moves, string)
 	}{
 		// ## ALL PIECES ##
 		"starting position": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.GenerateMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				return GenerateMoves(pos)
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 20, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 20, mvs.Length(), msg)
 			},
 		},
 		"this is 25 because a pseudo legal move is included which leaves the king in check": {
 			pos: "n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.GenerateMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				return GenerateMoves(pos)
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 25, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 25, mvs.Length(), msg)
 			},
 		},
 		"knight moves": {
 			pos: "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.GenerateMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				return GenerateMoves(pos)
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 48, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 48, mvs.Length(), msg)
 			},
 		},
 		// ## PAWN MOVES ##
 		"pawn moves from starting postion": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generatePawnMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 16, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 16, mvs.Length(), msg)
 			},
 		},
 		"white pawn attacks diagonal left and moves forward one": {
-			pos: "k7/8/r7/1P7/8/8/8/K7 w - - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generatePawnMoves()
+			pos: "k7/8/r7/1P6/8/8/8/K7 w - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 2, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 2, mvs.Length(), msg)
+			},
+		},
+		"black pawn attacks diagonal left and moves forward one": {
+			pos: "k7/8/r7/1p6/R7/8/8/K7 b - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 2, mvs.Length(), msg)
 			},
 		},
 		"white pawns reaches final rank and has four options for promotion": {
 			pos: "k7/7P/8/8/8/8/8/K7 w - - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generatePawnMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 4, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 4, mvs.Length(), msg)
 			},
 		},
 		"black pawns reaches final rank and has four options for promotion": {
 			pos: "k7/8/8/8/8/8/7p/K7 b - - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generatePawnMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 4, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 4, mvs.Length(), msg)
 			},
 		},
 		// ## QUEEN MOVES ##
 		"should be zero legal queen moves from starting position": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateQueenMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateQueenMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 0, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 0, mvs.Length(), msg)
 			},
 		},
 		"Legal queen moves from a1 blocked horizontally": {
 			pos: "7k/8/8/8/8/8/8/QK6 w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateQueenMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateQueenMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{56, 0}, {56, 7}, {56, 8}, {56, 14}, {56, 16},
 					{56, 21}, {56, 24}, {56, 28}, {56, 32}, {56, 35}, {56, 40}, {56, 42},
 					{56, 48}, {56, 49}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
 			},
 		},
 		// ## KING MOVES ##
-		"should be zero legal king moves from starting position": {
-			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateKingMoves()
+		"no white king moves from starting position": {
+			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 0, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 0, mvs.Length(), msg)
 			},
 		},
-		"legal white King moves from middle of board unblocked": {
+		"no black king moves from starting position": {
+			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 2",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 0, mvs.Length(), msg)
+			},
+		},
+		"white king middle of board unblocked": {
 			pos: "7k/8/8/8/3K4/8/8/3B4 w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateKingMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{35, 26}, {35, 27}, {35, 28}, {35, 34}, {35, 36}, {35, 42}, {35, 43}, {35, 44}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
 			},
 		},
-		"white king castling king-side": {
-			pos: "7k/8/8/8/8/8/PPPPPPPP/3QK3 w K - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateKingMoves()
+		"black king middle of board unblocked": {
+			pos: "7K/8/8/8/3k4/8/8/3B4 b - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{35, 26}, {35, 27}, {35, 28}, {35, 34}, {35, 36}, {35, 42}, {35, 43}, {35, 44}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"white king middle of board completely blocked": {
+			pos: "7k/8/8/PPPPPPPP/RRRKRRRR/RRRRRRRR/8/3B4 w - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"black king middle of board completely blocked": {
+			pos: "8/8/8/pppppppp/rrrkrrrr/rrrrrrrr/8/3B4 b - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"white king middle of board surrounded by opposition": {
+			pos: "7k/8/8/pppppppp/rrrKrrrr/rrrrrrrr/8/3B4 w - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{35, 26}, {35, 27}, {35, 28}, {35, 34}, {35, 36}, {35, 42}, {35, 43}, {35, 44}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"black king middle of board surrounded by opposition": {
+			pos: "8/8/8/PPPPPPPP/RRRkRRRR/RRRRRRRR/8/3B4 b - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{35, 26}, {35, 27}, {35, 28}, {35, 34}, {35, 36}, {35, 42}, {35, 43}, {35, 44}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"white castling king-side": {
+			pos: "7k/8/8/8/8/8/PPPPPPPP/3QK3 w K - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{60, 61}, {60, 62}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"black castling king-side": {
+			pos: "3rk3/pppppppp/8/8/8/8/PPPPPPPP/3QK3 b kq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{4, 6}, {4, 5}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"white castling queen-side": {
+			pos: "7k/8/8/8/8/8/PPPPPPPP/R3KQ2 w KQ - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{60, 59}, {60, 58}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"black castling queen-side": {
+			pos: "r3kr2/pppppppp/8/8/8/8/PPPPPPPP/3QK3 b kq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{4, 3}, {4, 2}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
 			},
 		},
 		"white king w/o castling permission": {
-			pos: "7k/8/8/8/8/8/PPPPPPPP/3QK3 w - - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateKingMoves()
+			pos: "7k/8/8/8/8/8/PPPPPPPP/R3K2R w - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				expectedMvs := [][]int{{60, 61}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{60, 61}, {60, 59}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
 			},
 		},
-		"black king castling king-side": {
-			pos: "3rk3/pppppppp/8/8/8/8/PPPPPPPP/3QK3 b kq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateKingMoves()
+		"black w/o castling permission": {
+			pos: "r3k2r/ppppppppp/8/8/8/8/PPPPPPPP/3QK3 b - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				expectedMvs := [][]int{{4, 6}, {4, 5}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{4, 3}, {4, 5}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"white castling both-sides": {
+			pos: "7k/8/8/8/8/8/PPPPPPPP/R3K2R w KQ - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{60, 59}, {60, 58}, {60, 61}, {60, 62}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"black castling both-sides": {
+			pos: "r3k2r/ppppppppp/8/8/8/8/PPPPPPPP/3QK3 b KQkq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{4, 3}, {4, 5}, {4, 2}, {4, 6}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"white has castling rights but blocked by own pieces both sides": {
+			pos: "7k/8/8/8/8/8/PPPPPPPP/R2QKQ1R w KQ - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"black has castling rights but blocked by own pieces both sides": {
+			pos: "r2qkq1r/ppppppppp/8/8/8/8/PPPPPPPP/3QK3 b KQkq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"white has castling rights but blocked by opposition pieces both sides": {
+			pos: "7k/8/8/8/8/8/PPPPPPPP/R2qKq1R w KQ - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{60, 61}, {60, 59}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"black has castling rights but blocked by opposition pieces both sides": {
+			pos: "r2QkQ1r/ppppppppp/8/8/8/8/PPPPPPPP/3QK3 b KQkq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{4, 3}, {4, 5}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"white has castling rights but blocked by opposition pieces on both sides with a space to move": {
+			pos: "7k/8/8/8/8/8/PPPPPPPP/R1q1K1qR w KQkq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{60, 61}, {60, 59}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"black has castling rights but blocked by opposition pieces on both sides with a space to move": {
+			pos: "r1Q1k1Qr/ppppppppp/8/8/8/8/PPPPPPPP/3QK3 b kq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{4, 3}, {4, 5}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
 			},
 		},
 		// ## BISHOP MOVES ##
 		"should be zero legal Bishop moves from starting position": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateBishopMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateBishopMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 0, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 0, mvs.Length(), msg)
 			},
 		},
 		"bishop  moves wide open spaces": {
 			pos: "7k/8/8/8/8/8/8/6KB w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateBishopMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateBishopMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{63, 0}, {63, 9}, {63, 18}, {63, 27}, {63, 36}, {63, 45}, {63, 54}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
 			},
 		},
 		"legal white bishop moves blocked on right array": {
 			pos: "7k/8/8/8/8/5r2/8/3B3K w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateBishopMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateBishopMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{59, 32}, {59, 41}, {59, 45}, {59, 50}, {59, 52}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
 			},
 		},
 		// ## ROOK MOVES ##
 		"should be zero legal white Rook moves from starting position": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateRookMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateRookMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 0, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 0, mvs.Length(), msg)
 			},
 		},
 		"should be zero legal black Rook moves from starting position": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 2",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateRookMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateRookMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 0, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 0, mvs.Length(), msg)
 			},
 		},
 		"Legal rook moves from a1 blocked horizontally": {
 			pos: "7k/8/8/8/8/8/8/RK6 w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateRookMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateRookMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{56, 0}, {56, 16}, {56, 8}, {56, 24}, {56, 32}, {56, 40}, {56, 48}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
 			},
 		},
 		"legal rook moves from d4 unblocked": {
 			pos: "7k/8/8/8/3R4/8/8/7K w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateRookMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateRookMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{35, 3}, {35, 11}, {35, 19}, {35, 27}, {35, 32}, {35, 33}, {35, 34}, {35, 36}, {35, 37}, {35, 38}, {35, 39}, {35, 43}, {35, 51}, {35, 59}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
 			},
 		},
 		// ## KNIGHT MOVES ##
 		"should be four legal knight moves from starting position": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateKnightMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKnightMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
-				assert.Equal(t, 4, mvs.movesList.Length())
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 4, mvs.Length(), msg)
 			},
 		},
 		"Legal knight moves from a1 blocked at c2 as white": {
 			pos: "7k/8/8/8/8/8/2B5/NK6 w KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateKnightMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKnightMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{56, 41}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
 			},
 		},
 		"Legal knight moves from a1 blocked at c2 as black": {
 			pos: "7k/8/8/8/8/1B6/2b5/nK6 b KQkq - 0 1",
-			generateMoves: func(mvs *LegalMoveGenerator) {
-				mvs.generateKnightMoves()
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKnightMoves(pos, mvs, ht)
+				return mvs
 			},
-			assertion: func(mvs *LegalMoveGenerator) {
+			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{56, 41}}
-				assert.ElementsMatch(t, expectedMvs, mvs.movesList.GetMoves())
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
 			},
 		},
 	}
-	for _, test := range tests {
+	for tName, test := range tests {
 		pos, _ := position.NewPositionFen(test.pos)
-		mvs := NewLegalMoveGenerator(pos)
-		test.generateMoves(mvs)
-		mvs.movesList.Print()
-		bb := mvs.movesList.GetBitboard()
-		bb.Print()
-		test.assertion(mvs)
+		legalMoves := test.generateMoves(pos)
+		test.assertion(legalMoves, tName)
 	}
-}
-
-func TestGenerateValidDirectionalMovesBb(t *testing.T) {
-	// piece sliding southwest from h8 unblocked
-	sw := hashtables.Lookup.SouthWestArrayBbHash
-	index := 7
-	validMvsBb := generateValidDirectionalMovesBb(index, sw, uint64(0), getMsb)
-	expectedValidMvsBb := uint64(0x102040810204000)
-	assert.Equal(t, expectedValidMvsBb, validMvsBb.Value())
-
-	// piece sliding north from a3, blocked on a7
-	north := hashtables.Lookup.NorthArrayBbHash
-	index = 40
-	validMvsBb = generateValidDirectionalMovesBb(index, north, uint64(0x100), getLsb)
-	expectedValidMvsBb = uint64(0x101010100)
-	assert.Equal(t, expectedValidMvsBb, validMvsBb.Value())
-}
-
-func TestGenerateValidDiagonalSlidingMovesBb(t *testing.T) {
-	// piece sliding diagonally from e4 unblocked
-	index := 36
-	occSqsVal := uint64(0)
-	validMvsBb := generateValidDiagonalSlidingMovesBb(index, occSqsVal, hashtables.Lookup)
-	expectedValidMvsBb, _ := bitboard.NewBitboard(uint64(0x8244280028448201))
-	expectedValidMvsBb.Print()
-	validMvsBb.Print()
-	assert.Equal(t, expectedValidMvsBb.Value(), validMvsBb.Value())
-
-	// piece sliding diagonally from a3 blocked at c5
-	index = 40
-	occSqsBb, _ := bitboard.NewBitboard(0)
-	occSqsBb.SetBit(26)
-	validMvsBb = generateValidDiagonalSlidingMovesBb(index, occSqsBb.Value(), hashtables.Lookup)
-	expectedValidMvsBb, _ = bitboard.NewBitboard(uint64(0x402000204000000))
-	expectedValidMvsBb.Print()
-	validMvsBb.Print()
-	assert.Equal(t, expectedValidMvsBb.Value(), validMvsBb.Value())
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/tonyOreglia/glee/pkg/moves"
 )
 
+// don't worry, this does not cause hash tables to be generated more than once
 var ht = hashtables.Lookup
 
 // White is the index of White's position bitboards in instance of Position Struct
@@ -86,10 +87,11 @@ func (p *Position) ActiveSideOccupiedSqsBb() *bitboard.Bitboard {
 }
 
 func (p *Position) IsWhitesTurn() bool {
-	if p.activeSide == White {
-		return true
-	}
-	return false
+	return p.activeSide == White
+}
+
+func (p *Position) IsBlacksTurn() bool {
+	return p.activeSide == Black
 }
 
 func (p *Position) InactiveSideOccupiedSqsBb() *bitboard.Bitboard {

@@ -5,8 +5,6 @@ package bitboard
 import (
 	"fmt"
 	"math/bits"
-
-	ht "github.com/tonyOreglia/glee/pkg/hashtables"
 )
 
 // Bitboard struct exposes uint64 "bitboard" with associated getter, setter, and helper fxns
@@ -120,7 +118,7 @@ func (b *Bitboard) Lsb() int {
 }
 
 func (b *Bitboard) RemoveBit(pos int) error {
-	b.bitboard &= ^ht.Lookup.SingleIndexBbHash[pos]
+	b.bitboard &= ^(uint64(1) << uint(pos))
 	return nil
 }
 
