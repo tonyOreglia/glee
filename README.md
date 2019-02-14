@@ -53,6 +53,6 @@ King
 
 
 Refactoring 
- - move generator should not be a class. It should just accepts a postion and return the moves
+ [x] move generator should not be a class. It should just accepts a postion and return the moves
  - hashtables should be generated once at the beginning and passed around by reference
 

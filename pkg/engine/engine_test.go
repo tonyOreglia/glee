@@ -40,7 +40,14 @@ func TestMinMax(t *testing.T) {
 	for _, tt := range flagtests {
 		perft, singlePlyPerft, mv := setup()
 		pos, _ := position.NewPositionFen(tt.fen)
-		minMax(tt.depth, tt.depth, &pos, &mv, &perft, &singlePlyPerft)
+		minMax(searchParams{
+			depth:          tt.depth,
+			ply:            tt.depth,
+			pos:            &pos,
+			engineMove:     &mv,
+			perft:          &perft,
+			singlePlyPerft: &singlePlyPerft,
+		})
 		assert.Equal(t, tt.expectedNodes, perft)
 	}
 }
