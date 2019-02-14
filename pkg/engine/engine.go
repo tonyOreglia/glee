@@ -48,62 +48,56 @@ func minMax(p searchParams) int {
 func generateMoves(value *int, tempValue *int, root bool, p searchParams) error {
 	mvList := generate.GenerateMoves(*p.pos).GetMovesList()
 	for _, move := range mvList {
-		evaluateMove(move, value, tempValue, root, p.depth, p.ply, p.pos, p.engineMove, p.perft, p.singlePlyPerft)
+		evaluateMove(move, value, tempValue, root, p)
 	}
 	return nil
 }
 
-func evaluateMove(move moves.Move, value *int, tempValue *int, root bool, depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) error {
-	if (*pos).IsCastlingMove(move) {
-		if !castlingMoveIsValid(move, value, tempValue, root, depth, ply, pos, engineMove, perft, singlePlyPerft) {
+func evaluateMove(move moves.Move, value *int, tempValue *int, root bool, p searchParams) error {
+	if (*p.pos).IsCastlingMove(move) {
+		if !castlingMoveIsValid(move, value, tempValue, root, p) {
 			return nil
 		}
 	}
-	(*pos).Move(move)
-	legalMoves := generate.GenerateMoves(*pos)
+	(*p.pos).Move(move)
+	legalMoves := generate.GenerateMoves(*p.pos)
 	// mg.GenerateMoves()
-	if (*pos).IsAttacked((*pos).InactiveSideKingBb(), legalMoves.AttackedSqsBb()) {
-		*pos = (*pos).UnMakeMove()
+	if (*p.pos).IsAttacked((*p.pos).InactiveSideKingBb(), legalMoves.AttackedSqsBb()) {
+		*p.pos = (*p.pos).UnMakeMove()
 		return nil
 	}
-	*tempValue = minMax(searchParams{
-		depth:          depth,
-		ply:            ply - 1,
-		pos:            pos,
-		engineMove:     engineMove,
-		perft:          perft,
-		singlePlyPerft: singlePlyPerft,
-	})
+	p.ply = p.ply - 1
+	*tempValue = minMax(p)
 	if *tempValue > *value {
 		value = tempValue
 		if root {
-			*engineMove = move.CopyMove()
+			*p.engineMove = move.CopyMove()
 		}
 	}
 	if root {
 		move.Print()
-		fmt.Println(*singlePlyPerft)
-		*perft += *singlePlyPerft
-		*singlePlyPerft = 0
+		fmt.Println(*p.singlePlyPerft)
+		*p.perft += *p.singlePlyPerft
+		*p.singlePlyPerft = 0
 	}
-	*pos = (*pos).UnMakeMove()
+	*p.pos = (*p.pos).UnMakeMove()
 	return nil
 }
 
-func castlingMoveIsValid(move moves.Move, value *int, tempValue *int, root bool, depth int, ply int, pos **position.Position, engineMove **moves.Move, perft *int, singlePlyPerft *int) bool {
-	tempPos := *pos
-	*pos = (*pos).UnMakeMove()
-	legalMoves := generate.GenerateMoves(*pos)
+func castlingMoveIsValid(move moves.Move, value *int, tempValue *int, root bool, p searchParams) bool {
+	tempPos := *p.pos
+	*p.pos = (*p.pos).UnMakeMove()
+	legalMoves := generate.GenerateMoves(*p.pos)
 	// mg.GenerateMoves()
 	castlingSlidingSqBb, err := bitboard.NewBitboard(uint64(0))
 	castlingSlidingSqBb.SetBit(int(ht.LookupCastlingSlidingSqByDest[uint64(move.Destination())]))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	if (*pos).IsAttacked(*castlingSlidingSqBb, legalMoves.AttackedSqsBb()) {
-		*pos = tempPos
+	if (*p.pos).IsAttacked(*castlingSlidingSqBb, legalMoves.AttackedSqsBb()) {
+		*p.pos = tempPos
 		return false
 	}
-	*pos = tempPos
+	*p.pos = tempPos
 	return true
 }
