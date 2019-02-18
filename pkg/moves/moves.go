@@ -51,7 +51,10 @@ func (m *Moves) Length() int {
 }
 
 func (m *Moves) Print() {
-	fmt.Print(m.mvs)
+	for _, move := range m.mvs {
+		move.Print()
+		fmt.Println()
+	}
 }
 
 func (m *Moves) AttackedSqsBb() bitboard.Bitboard {

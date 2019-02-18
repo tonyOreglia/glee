@@ -45,6 +45,20 @@ func TestGenerateMoves(t *testing.T) {
 				assert.Equal(t, 48, mvs.Length(), msg)
 			},
 		},
+		// "perft failing position": {
+		// 	// missing e8f7
+		// 	// adds two moves: e8c8 and e8d8 (these are OK because it's pseudo legal moves)
+		// 	pos: "r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
+		// 	generateMoves: func(pos *position.Position) *moves.Moves {
+		// 		pos.Print()
+		// 		return GenerateMoves(pos)
+		// 	},
+		// 	assertion: func(mvs *moves.Moves, msg string) {
+		// 		mvs.Print()
+		// // 45 actual fully legal moves
+		// 		assert.Equal(t, 47, mvs.Length(), msg)
+		// 	},
+		// },
 		// ## PAWN MOVES ##
 		"pawn moves from starting postion": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -388,6 +402,17 @@ func TestGenerateMoves(t *testing.T) {
 			assertion: func(mvs *moves.Moves, msg string) {
 				expectedMvs := [][]int{{4, 3}, {4, 5}}
 				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
+			},
+		},
+		"king moves castling and an attack an seventh rank": {
+			pos: "r3k2r/5N2/8/8/8/8/8/7K b KQkq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 7, mvs.Length(), msg)
 			},
 		},
 		// ## BISHOP MOVES ##

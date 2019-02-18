@@ -78,7 +78,8 @@ func GenerateKingMoves(pos *position.Position, mvsList *moves.Moves, ht *hashtab
 			BitwiseAnd(kingMovesLookup).
 			RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb()).
 			RemoveOverlappingBits(pos.GetActiveSideCastlingRightsBb()).
-			RemoveOverlappingBits(bitboard.ReturnBitwiseAnd(pos.InactiveSideOccupiedSqsBb(), castlingBits))
+			RemoveOverlappingBits(bitboard.ReturnBitwiseAnd(pos.InactiveSideOccupiedSqsBb(), castlingBits)).
+			Combine(bitboard.ReturnBitwiseAnd(kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb()), finalRankBb.ReturnBitsFlipped()))
 	} else {
 		validMovesBb = kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb())
 	}

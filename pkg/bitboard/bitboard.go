@@ -96,6 +96,12 @@ func (b *Bitboard) BitIsNotSet(bit int) bool {
 	return !b.BitIsSet(bit)
 }
 
+func (b *Bitboard) ReturnBitsFlipped() *Bitboard {
+	newBB := new(Bitboard)
+	newBB.Set(^b.Value())
+	return newBB
+}
+
 func (b *Bitboard) GetBitValue(bit int) uint {
 	if b.BitIsSet(bit) {
 		return 1
