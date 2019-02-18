@@ -59,34 +59,35 @@ func GenerateKnightMoves(pos *position.Position, mvsList *moves.Moves, ht *hasht
 	generateLegalMovesForSinglePiece(pos, mvsList, pos.GetActiveSidesBitboards()[position.Knights].Value(), getKnightMovesBb, ht)
 }
 
-func GenerateKingMoves(pos *position.Position, mvsList *moves.Moves, ht *hashtables.HashTables) {
+// GenerateKingMovesFromInitialPosition checks valid moves with castling taken into account
+func GenerateKingMovesFromInitialPosition(pos *position.Position, mvsList *moves.Moves, ht *hashtables.HashTables) *bitboard.Bitboard {
 	kingBb := pos.GetActiveSidesBitboards()[position.King]
-	if kingBb.Value() == 0 {
-		return // this should not be possible?
-	}
 	kingPosition := kingBb.Lsb()
 	kingMovesLookup, _ := bitboard.NewBitboard(ht.LegalKingMovesBbHash[pos.GetActiveSide()][kingPosition])
 	castlingBits, _ := bitboard.NewBitboard(ht.CastlingBits[0] | ht.CastlingBits[1])
 	occSqsBb := pos.AllOccupiedSqsBb().Value()
 	finalRankBb, _ := bitboard.NewBitboard(ht.EighthRankBb | ht.FirstRankBb)
-	var validMovesBb *bitboard.Bitboard
+	return generateValidDirectionalMovesBb(kingPosition, ht.EastArrayBbHash, occSqsBb, getLsb).
+		Combine(generateValidDirectionalMovesBb(kingPosition, ht.WestArrayBbHash, occSqsBb, getMsb)).
+		// only allow sliding moves that are withing the legal king moves
+		BitwiseAnd(kingMovesLookup).
+		// cannot move to square that is occupied by same side
+		RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb()).
+		// remove castling move if permissions is not set
+		RemoveOverlappingBits(pos.GetActiveSideCastlingRightsBb()).
+		// remove castling moves if there is an opposing piece there
+		RemoveOverlappingBits(bitboard.ReturnBitwiseAnd(pos.InactiveSideOccupiedSqsBb(), castlingBits)).
+		// add in moves that are not on the final rank
+		Combine(bitboard.ReturnBitwiseAnd(kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb()), finalRankBb.ReturnBitsFlipped()))
+}
 
-	// if white king is on 8th rank, this is fine as there is no castling in the lookup there.
-	if bitboard.ReturnBitwiseAnd(finalRankBb, &kingBb).Value() != 0 {
-		// sliding moves right
-		validMovesBb = generateValidDirectionalMovesBb(kingPosition, ht.EastArrayBbHash, occSqsBb, getLsb).
-			// sliding moves left
-			Combine(generateValidDirectionalMovesBb(kingPosition, ht.WestArrayBbHash, occSqsBb, getMsb)).
-			// only allow sliding moves that are withing the legal king moves
-			BitwiseAnd(kingMovesLookup).
-			// cannot move to square that is occupied by same side
-			// RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb()).
-			// remove castling move if permissions is not set
-			RemoveOverlappingBits(pos.GetActiveSideCastlingRightsBb()).
-			// remove castling moves if there is an opposing piece there
-			RemoveOverlappingBits(bitboard.ReturnBitwiseAnd(pos.InactiveSideOccupiedSqsBb(), castlingBits)).
-			// add in moves that are not on the final rank
-			Combine(kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb()))
+func GenerateKingMoves(pos *position.Position, mvsList *moves.Moves, ht *hashtables.HashTables) {
+	kingBb := pos.GetActiveSidesBitboards()[position.King]
+	kingPosition := kingBb.Lsb()
+	kingMovesLookup, _ := bitboard.NewBitboard(ht.LegalKingMovesBbHash[pos.GetActiveSide()][kingPosition])
+	var validMovesBb *bitboard.Bitboard
+	if kingPosition == 4 || kingPosition == 60 {
+		validMovesBb = GenerateKingMovesFromInitialPosition(pos, mvsList, ht)
 	} else {
 		validMovesBb = kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb())
 	}
