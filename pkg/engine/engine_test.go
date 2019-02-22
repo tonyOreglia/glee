@@ -26,6 +26,7 @@ var flagtests = []struct {
 	{"r3k2r/p1ppqNb1/1n2pnp1/1b1P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 1 1", 2, 2084, "test position 001 --> a6b5"},
 	{"r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1", 2, 2080, "test position 001"},
 	{"r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1", 3, 88799, "test position 001"},
+	{"r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1", 4, 4164923, "test position 001"},
 }
 
 func setup() (int, int) {
