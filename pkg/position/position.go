@@ -169,6 +169,8 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 	// double pawn push move, set en passante
 	if p.bitboards[p.activeSide][Pawns].BitIsSet(originIndex) && terminusIndex-originIndex == -16 || terminusIndex-originIndex == 16 {
 		p.enPassanteSq = (terminusIndex-originIndex)/2 + originIndex
+	} else {
+		p.enPassanteSq = 64
 	}
 	movingPiece := p.updateMovingSidesBbs(originIndex, terminusIndex)
 
