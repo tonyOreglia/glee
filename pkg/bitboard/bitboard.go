@@ -93,6 +93,10 @@ func GetShiftedRightBb(b *Bitboard, shift uint) *Bitboard {
 	return shiftedBb
 }
 
+func (b *Bitboard) IsZero() bool {
+	return b.Value() == uint64(0)
+}
+
 func (b *Bitboard) BitIsSet(bit int) bool {
 	return ((uint64(1) << uint(bit)) & b.bitboard) != uint64(0)
 }

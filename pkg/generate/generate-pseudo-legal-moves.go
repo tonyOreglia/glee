@@ -85,31 +85,39 @@ func GenerateKingMoves(pos *position.Position, mvsList *moves.Moves, ht *hashtab
 	kingBb := pos.GetActiveSidesBitboards()[position.King]
 	kingPosition := kingBb.Lsb()
 	kingMovesLookup := bitboard.NewBitboard(ht.LegalKingMovesBbHash[pos.GetActiveSide()][kingPosition])
-	var validMovesBb *bitboard.Bitboard
+	// validMovesBb := bitboard.NewBitboard(uint64(0))
+	validMovesBb := kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb())
 	// If king is in original position then check castling rights and if the sliding sq's are clear
-	// if kingPosition == 4 {
-	// 	if pos.BlackCanCastleKingSide() {
-	// 		if ht.BlacklKingSideCastlingBitsMustBeClear&pos.AllOccupiedSqsBb().Value() == 0 {
-
-	// 		}
-	// 	}
-	// 	if pos.BlackCanCastleQueenSide() {
-
-	// 	}
-	// 	validMovesBb = GenerateKingMovesFromInitialPosition(pos, mvsList, ht)
-	// } else if kingPosition == 60 {
-	// 	if pos.WhiteCanCastleKingSide() {
-
-	// 	}
-	// 	if pos.WhiteCanCastleQueenSide() {
-
-	// 	}
-	// }
-	if kingPosition == 4 || kingPosition == 60 {
-		validMovesBb = GenerateKingMovesFromInitialPosition(pos, mvsList, ht)
-	} else {
-		validMovesBb = kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb())
+	if kingPosition == 4 {
+		if pos.BlackCanCastleKingSide() {
+			if bitboard.ReturnBitwiseAnd(bitboard.NewBitboard(ht.BlacklKingSideCastlingBitsMustBeClear), pos.AllOccupiedSqsBb()).IsZero() {
+				validMovesBb.SetBit(6)
+			}
+		}
+		if pos.BlackCanCastleQueenSide() {
+			if bitboard.ReturnBitwiseAnd(bitboard.NewBitboard(ht.BlackQueenSideCastlingBitsMustBeClear), pos.AllOccupiedSqsBb()).IsZero() {
+				validMovesBb.SetBit(2)
+			}
+		}
+		// validMovesBb = GenerateKingMovesFromInitialPosition(pos, mvsList, ht)
+	} else if kingPosition == 60 {
+		if pos.WhiteCanCastleKingSide() {
+			if bitboard.ReturnBitwiseAnd(bitboard.NewBitboard(ht.WhiteKingSideCastlingBitsMustBeClear), pos.AllOccupiedSqsBb()).IsZero() {
+				validMovesBb.SetBit(62)
+			}
+		}
+		if pos.WhiteCanCastleQueenSide() {
+			if bitboard.ReturnBitwiseAnd(bitboard.NewBitboard(ht.WhiteQueenSideCastlingBitsMustBeClear), pos.AllOccupiedSqsBb()).IsZero() {
+				validMovesBb.SetBit(56)
+			}
+		}
 	}
+
+	// if kingPosition == 4 || kingPosition == 60 {
+	// 	validMovesBb = GenerateKingMovesFromInitialPosition(pos, mvsList, ht)
+	// } else {
+	// 	validMovesBb = kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb())
+	// }
 
 	addValidMovesToArray(mvsList, kingPosition, validMovesBb)
 }
