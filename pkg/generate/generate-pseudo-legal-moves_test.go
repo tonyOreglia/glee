@@ -45,20 +45,6 @@ func TestGenerateMoves(t *testing.T) {
 				assert.Equal(t, 48, mvs.Length(), msg)
 			},
 		},
-		// "perft failing position": {
-		// 	// missing e8f7
-		// 	// adds two moves: e8c8 and e8d8 (these are OK because it's pseudo legal moves)
-		// 	pos: "r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
-		// 	generateMoves: func(pos *position.Position) *moves.Moves {
-		// 		pos.Print()
-		// 		return GenerateMoves(pos)
-		// 	},
-		// 	assertion: func(mvs *moves.Moves, msg string) {
-		// 		mvs.Print()
-		// // 45 actual fully legal moves
-		// 		assert.Equal(t, 47, mvs.Length(), msg)
-		// 	},
-		// },
 		// ## PAWN MOVES ##
 		"pawn moves from starting postion": {
 			pos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -113,6 +99,30 @@ func TestGenerateMoves(t *testing.T) {
 			},
 			assertion: func(mvs *moves.Moves, msg string) {
 				assert.Equal(t, 4, mvs.Length(), msg)
+			},
+		},
+		"black pawns attacks en passante square": {
+			pos: "k7/8/8/8/6pP/8/8/K7 b - h3 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{38, 47}, {38, 46}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
+			},
+		},
+		"white pawns attacks en passante square": {
+			pos: "k7/8/8/pP6/8/8/8/K7 w - a6 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{25, 17}, {25, 16}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves())
 			},
 		},
 		// ## QUEEN MOVES ##

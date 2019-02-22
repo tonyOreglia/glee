@@ -102,6 +102,7 @@ func GeneratePawnMoves(pos *position.Position, mvsList *moves.Moves, ht *hashtab
 	var promotionRank *bitboard.Bitboard
 	var attackRightShift uint
 	var attackLeftShift uint
+	enPassanteBB := bitboard.NewBitboardFromIndex(pos.EnPassante())
 	if pos.GetActiveSide() == position.White {
 		getShiftedBb = bitboard.GetShiftedRightBb
 		directionOfMovement = 1
@@ -122,12 +123,14 @@ func GeneratePawnMoves(pos *position.Position, mvsList *moves.Moves, ht *hashtab
 	hFileBb, _ := bitboard.NewBitboard(ht.HfileBb)
 	aFileBb, _ := bitboard.NewBitboard(ht.AfileBb)
 
-	pawnAttackBb := getShiftedBb(&pawnPosBb, attackLeftShift)
-	pawnAttackBb.RemoveOverlappingBits(hFileBb).BitwiseAnd(pos.InactiveSideOccupiedSqsBb())
+	pawnAttackBb := getShiftedBb(&pawnPosBb, attackLeftShift).
+		RemoveOverlappingBits(hFileBb).
+		BitwiseAnd(bitboard.ReturnCombined(pos.InactiveSideOccupiedSqsBb(), enPassanteBB))
 	addPawnMovesToArray(mvsList, int(attackLeftShift), directionOfMovement, pawnAttackBb, promotionRank)
 
-	pawnAttackBb = getShiftedBb(&pawnPosBb, attackRightShift)
-	pawnAttackBb.RemoveOverlappingBits(aFileBb).BitwiseAnd(pos.InactiveSideOccupiedSqsBb())
+	pawnAttackBb = getShiftedBb(&pawnPosBb, attackRightShift).
+		RemoveOverlappingBits(aFileBb).
+		BitwiseAnd(bitboard.ReturnCombined(pos.InactiveSideOccupiedSqsBb(), enPassanteBB))
 	addPawnMovesToArray(mvsList, int(attackRightShift), directionOfMovement, pawnAttackBb, promotionRank)
 
 	pawnPushBb := getShiftedBb(&pawnPosBb, 8)
@@ -165,7 +168,6 @@ func addValidMovesToArray(movesList *moves.Moves, index int, validMovesBb *bitbo
 		validMove = validMovesBb.Lsb()
 		validMovesBb.RemoveBit(validMove)
 		movesList.AddMove(index, validMove)
-		// moves = append(moves, [2]int{index, validMove})
 	}
 }
 

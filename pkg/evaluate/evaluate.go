@@ -5,7 +5,6 @@ import (
 )
 
 func EvaluatePosition(pos *position.Position, perft *int) int {
-	// pos.Print()
 	score := 0
 	*perft++
 

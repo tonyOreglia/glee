@@ -17,6 +17,12 @@ func NewBitboard(bb uint64) (*Bitboard, error) {
 	return bitboard, nil
 }
 
+func NewBitboardFromIndex(i int) *Bitboard {
+	bb := &Bitboard{}
+	bb.SetBit(i)
+	return bb
+}
+
 // NewBbFromMovesSlice takes a legal moves slice and returns a bitboard representing those moves
 func NewBbFromMovesSlice(mvs [][2]int) *Bitboard {
 	bitboard := &Bitboard{}

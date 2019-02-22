@@ -60,7 +60,7 @@ func NewPositionFen(fen string) (*Position, error) {
 	p.enPassanteSq = enPassanteSq
 	p.moveCt = moveCount
 	p.halfMoveCt = halfMoveCount
-	p.previousPos = p
+	p.previousPos = nil
 	return p, nil
 }
 
@@ -92,6 +92,10 @@ func (p *Position) IsWhitesTurn() bool {
 
 func (p *Position) IsBlacksTurn() bool {
 	return p.activeSide == Black
+}
+
+func (p *Position) EnPassante() int {
+	return p.enPassanteSq
 }
 
 func (p *Position) InactiveSideOccupiedSqsBb() *bitboard.Bitboard {
@@ -181,12 +185,6 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 		p.revokeQueenSideCastlingRight()
 		p.revokeKingSideCastlingRight()
 	}
-	p.updatedOccupiedSqBitboard(p.activeSide)
-	p.switchActiveSide()
-	p.removeAttackedPieceFromBbs(terminusIndex)
-	if p.activeSide == Black {
-		p.moveCt++
-	}
 	if movingPiece == Rooks {
 		if originIndex == 0 || originIndex == 56 {
 			p.revokeQueenSideCastlingRight()
@@ -194,6 +192,20 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 		if originIndex == 7 || originIndex == 63 {
 			p.revokeKingSideCastlingRight()
 		}
+	}
+	p.updatedOccupiedSqBitboard(p.activeSide)
+	p.switchActiveSide()
+	attackedPiece := p.removeAttackedPieceFromBbs(terminusIndex)
+	if attackedPiece == Rooks {
+		if (terminusIndex % 8) == 7 {
+			p.revokeKingSideCastlingRight()
+		} else if (terminusIndex % 8) == 0 {
+			p.revokeQueenSideCastlingRight()
+		}
+	}
+	p.updatedOccupiedSqBitboard(p.activeSide)
+	if p.activeSide == Black {
+		p.moveCt++
 	}
 }
 
@@ -234,22 +246,28 @@ func (p *Position) switchActiveSide() {
 	}
 }
 
-func (p *Position) removeAttackedPieceFromBbs(terminus int) {
+func (p *Position) removeAttackedPieceFromBbs(terminus int) int {
 	switch {
 	case p.bitboards[p.activeSide][Pawns].BitIsSet(terminus):
 		p.bitboards[p.activeSide][Pawns].RemoveBit(terminus)
+		return Pawns
 	case p.bitboards[p.activeSide][Rooks].BitIsSet(terminus):
 		p.bitboards[p.activeSide][Rooks].RemoveBit(terminus)
+		return Rooks
 	case p.bitboards[p.activeSide][Knights].BitIsSet(terminus):
 		p.bitboards[p.activeSide][Knights].RemoveBit(terminus)
+		return Knights
 	case p.bitboards[p.activeSide][Bishops].BitIsSet(terminus):
 		p.bitboards[p.activeSide][Bishops].RemoveBit(terminus)
+		return Bishops
 	case p.bitboards[p.activeSide][Queen].BitIsSet(terminus):
 		p.bitboards[p.activeSide][Queen].RemoveBit(terminus)
+		return Queen
 	case p.bitboards[p.activeSide][King].BitIsSet(terminus):
 		p.bitboards[p.activeSide][King].RemoveBit(terminus)
+		return King
 	}
-	p.updatedOccupiedSqBitboard(p.activeSide)
+	return 0
 }
 
 func (p *Position) updateMovingSidesBbs(origin int, terminus int) int {
