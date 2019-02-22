@@ -2,7 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/tonyOreglia/glee/pkg/bitboard"
 	"github.com/tonyOreglia/glee/pkg/evaluate"
@@ -86,12 +85,9 @@ func makeValidMove(move moves.Move, pos **position.Position) bool {
 func castlingMoveIsValid(move moves.Move, pos **position.Position) bool {
 	kingPosition := bitboard.NewBitboardFromIndex(move.Origin())
 	legalMoves := generate.GenerateMoves(*pos)
-	castlingSlidingSqBb, err := bitboard.NewBitboard(uint64(0))
+	castlingSlidingSqBb := bitboard.NewBitboard(uint64(0))
 	castlingSlidingSqBb.SetBit(int(ht.LookupCastlingSlidingSqByDest[uint64(move.Destination())]))
 	castlingSlidingSqBb.Combine(kingPosition)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	if (*pos).IsAttacked(*castlingSlidingSqBb, legalMoves.AttackedSqsBb()) {
 		return false
 	}

@@ -29,14 +29,14 @@ func TestGenerateValidDiagonalSlidingMovesBb(t *testing.T) {
 	index := 36
 	occSqsVal := uint64(0)
 	validMvsBb := generateValidDiagonalSlidingMovesBb(index, occSqsVal, hashtables.Lookup)
-	expectedValidMvsBb, _ := bitboard.NewBitboard(uint64(0x8244280028448201))
+	expectedValidMvsBb := bitboard.NewBitboard(uint64(0x8244280028448201))
 	assert.Equal(t, expectedValidMvsBb.Value(), validMvsBb.Value())
 
 	// piece sliding diagonally from a3 blocked at c5
 	index = 40
-	occSqsBb, _ := bitboard.NewBitboard(0)
+	occSqsBb := bitboard.NewBitboard(0)
 	occSqsBb.SetBit(26)
 	validMvsBb = generateValidDiagonalSlidingMovesBb(index, occSqsBb.Value(), hashtables.Lookup)
-	expectedValidMvsBb, _ = bitboard.NewBitboard(uint64(0x402000204000000))
+	expectedValidMvsBb = bitboard.NewBitboard(uint64(0x402000204000000))
 	assert.Equal(t, expectedValidMvsBb.Value(), validMvsBb.Value())
 }

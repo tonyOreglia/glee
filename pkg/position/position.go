@@ -233,10 +233,7 @@ func (p *Position) IsCastlingMove(mv moves.Move) bool {
 
 func (p *Position) IsKingMove(mv moves.Move) bool {
 	activeSideKingBb := p.ActiveSideKingBb()
-	originBb, e := bitboard.NewBitboard(ht.SingleIndexBbHash[mv.Origin()])
-	if e != nil {
-		fmt.Errorf(e.Error())
-	}
+	originBb := bitboard.NewBitboard(ht.SingleIndexBbHash[mv.Origin()])
 	return bitboard.ReturnBitwiseAnd(&activeSideKingBb, originBb).Value() != uint64(0)
 }
 
@@ -321,6 +318,22 @@ func (p *Position) convertEnPassanteSqToFenString() string {
 		return "-"
 	}
 	return convertIndexToAlgebraic(p.enPassanteSq)
+}
+
+func (p *Position) WhiteCanCastleKingSide() bool {
+	return p.castlingRights[White].BitIsNotSet(WhiteKingSideCastlingRightsBit)
+}
+
+func (p *Position) WhiteCanCastleQueenSide() bool {
+	return p.castlingRights[White].BitIsNotSet(WhiteQueenSideCastlingRightsBit)
+}
+
+func (p *Position) BlackCanCastleKingSide() bool {
+	return p.castlingRights[Black].BitIsNotSet(BlackKingSideCastlingRightsBit)
+}
+
+func (p *Position) BlackCanCastleQueenSide() bool {
+	return p.castlingRights[Black].BitIsNotSet(BlackQueenSideCastlingRightsBit)
 }
 
 func (p *Position) convertCastlingRightsToFenString() string {

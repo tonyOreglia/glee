@@ -12,9 +12,8 @@ type Bitboard struct {
 	bitboard uint64
 }
 
-func NewBitboard(bb uint64) (*Bitboard, error) {
-	bitboard := &Bitboard{bitboard: bb}
-	return bitboard, nil
+func NewBitboard(bb uint64) *Bitboard {
+	return &Bitboard{bitboard: bb}
 }
 
 func NewBitboardFromIndex(i int) *Bitboard {
@@ -43,7 +42,7 @@ func (b *Bitboard) Combine(bb *Bitboard) *Bitboard {
 }
 
 func ReturnCombined(bb *Bitboard, bb2 *Bitboard) *Bitboard {
-	combinedBb, _ := NewBitboard(bb.Value() | bb2.Value())
+	combinedBb := NewBitboard(bb.Value() | bb2.Value())
 	return combinedBb
 }
 
@@ -53,17 +52,17 @@ func (b *Bitboard) BitwiseAnd(bb *Bitboard) *Bitboard {
 }
 
 func ReturnBitwiseAnd(bb *Bitboard, b *Bitboard) *Bitboard {
-	overlap, _ := NewBitboard(b.bitboard & bb.bitboard)
+	overlap := NewBitboard(b.bitboard & bb.bitboard)
 	return overlap
 }
 
 func ReturnOverlapBb(bb1 *Bitboard, bb2 *Bitboard) *Bitboard {
-	overlapBb, _ := NewBitboard(bb1.Value() & bb2.Value())
+	overlapBb := NewBitboard(bb1.Value() & bb2.Value())
 	return overlapBb
 }
 
 func (b *Bitboard) PopulationCount() int {
-	copy, _ := NewBitboard(b.Value())
+	copy := NewBitboard(b.Value())
 	count := 0
 	for copy.Value() != 0 {
 		copy.RemoveBit(copy.Lsb())

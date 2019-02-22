@@ -12,35 +12,39 @@ var Lookup = CalculateAllLookupBbs()
 
 // HashTables holds bitoard lookup tables used in move generation
 type HashTables struct {
-	AfileBb                             uint64
-	BfileBb                             uint64
-	CfileBb                             uint64
-	DfileBb                             uint64
-	EfileBb                             uint64
-	FfileBb                             uint64
-	GfileBb                             uint64
-	HfileBb                             uint64
-	FourthRankBb                        uint64
-	FifthRankBb                         uint64
-	FirstRankBb                         uint64
-	EighthRankBb                        uint64
-	SingleIndexBbHash                   [64]uint64
-	EnPassantBbHash                     [64]uint64
-	AttackedEnPassantPawnLocationBbHash [64]uint64
-	NorthArrayBbHash                    [64]uint64
-	SouthArrayBbHash                    [64]uint64
-	EastArrayBbHash                     [64]uint64
-	WestArrayBbHash                     [64]uint64
-	NorthEastArrayBbHash                [64]uint64
-	NorthWestArrayBbHash                [64]uint64
-	SouthEastArrayBbHash                [64]uint64
-	SouthWestArrayBbHash                [64]uint64
-	KnightAttackBbHash                  [64]uint64
-	LegalKingMovesBbHash                [2][64]uint64
-	LegalKingMovesNoCastlingBbHash      [64]uint64
-	CastlingBits                        [2]uint64
-	LegalPawnMovesBbHash                [2][64]uint64
-	LookupCastlingSlidingSqByDest       map[uint64]uint64
+	AfileBb                               uint64
+	BfileBb                               uint64
+	CfileBb                               uint64
+	DfileBb                               uint64
+	EfileBb                               uint64
+	FfileBb                               uint64
+	GfileBb                               uint64
+	HfileBb                               uint64
+	FourthRankBb                          uint64
+	FifthRankBb                           uint64
+	FirstRankBb                           uint64
+	EighthRankBb                          uint64
+	SingleIndexBbHash                     [64]uint64
+	EnPassantBbHash                       [64]uint64
+	AttackedEnPassantPawnLocationBbHash   [64]uint64
+	NorthArrayBbHash                      [64]uint64
+	SouthArrayBbHash                      [64]uint64
+	EastArrayBbHash                       [64]uint64
+	WestArrayBbHash                       [64]uint64
+	NorthEastArrayBbHash                  [64]uint64
+	NorthWestArrayBbHash                  [64]uint64
+	SouthEastArrayBbHash                  [64]uint64
+	SouthWestArrayBbHash                  [64]uint64
+	KnightAttackBbHash                    [64]uint64
+	LegalKingMovesBbHash                  [2][64]uint64
+	LegalKingMovesNoCastlingBbHash        [64]uint64
+	CastlingBits                          [2]uint64
+	LegalPawnMovesBbHash                  [2][64]uint64
+	WhiteKingSideCastlingBitsMustBeClear  uint64
+	BlacklKingSideCastlingBitsMustBeClear uint64
+	WhiteQueenSideCastlingBitsMustBeClear uint64
+	BlackQueenSideCastlingBitsMustBeClear uint64
+	LookupCastlingSlidingSqByDest         map[uint64]uint64
 }
 
 func CalculateAllLookupBbs() *HashTables {
@@ -62,6 +66,11 @@ func CalculateAllLookupBbs() *HashTables {
 	hashTables.FifthRankBb = 0xFF000000
 	hashTables.FirstRankBb = 0xFF00000000000000
 	hashTables.EighthRankBb = 0xFF
+
+	hashTables.WhiteKingSideCastlingBitsMustBeClear = uint64(3) << 61
+	hashTables.BlacklKingSideCastlingBitsMustBeClear = uint64(3) << 5
+	hashTables.WhiteQueenSideCastlingBitsMustBeClear = uint64(7) << 57
+	hashTables.BlackQueenSideCastlingBitsMustBeClear = uint64(7) << 1
 
 	for index := 0; index < 64; index++ {
 		hashTables.EnPassantBbHash[index] = uint64(0)
@@ -216,16 +225,19 @@ func generateArrayBitboardLookup(ht *HashTables) {
 			ht.LegalKingMovesBbHash[1][index] |= ht.SingleIndexBbHash[index-7]
 			ht.LegalKingMovesNoCastlingBbHash[index] |= ht.SingleIndexBbHash[index-7]
 		}
-		ht.LegalKingMovesBbHash[0][index] = ht.LegalKingMovesBbHash[1][index]
 		// removing overflow from a file to h file
 		if ht.SingleIndexBbHash[index]&ht.AfileBb != 0 {
 			ht.LegalKingMovesBbHash[1][index] &= ^ht.HfileBb
 			ht.LegalKingMovesBbHash[0][index] &= ^ht.HfileBb
+			ht.LegalKingMovesNoCastlingBbHash[index] &= ^ht.HfileBb
 		}
 		if ht.SingleIndexBbHash[index]&ht.HfileBb != 0 {
 			ht.LegalKingMovesBbHash[1][index] &= ^ht.AfileBb
 			ht.LegalKingMovesBbHash[0][index] &= ^ht.AfileBb
+			ht.LegalKingMovesNoCastlingBbHash[index] &= ^ht.AfileBb
 		}
+
+		ht.LegalKingMovesBbHash[0][index] = ht.LegalKingMovesBbHash[1][index]
 
 		if index == 4 {
 			ht.LegalKingMovesBbHash[1][4] |= ht.SingleIndexBbHash[2] | ht.SingleIndexBbHash[6]
@@ -304,6 +316,11 @@ func PrintAllBitboards(ht *HashTables) {
 	f.Write([]byte("\tH FILE:"))
 	// f.Write([]byte(strconv.Itoa(int(ht.HfileBb))))
 	printBitBoard(f, ht.HfileBb)
+	f.Write([]byte("\tCastling BITS:"))
+	printBitBoard(f, ht.WhiteKingSideCastlingBitsMustBeClear)
+	printBitBoard(f, ht.BlacklKingSideCastlingBitsMustBeClear)
+	printBitBoard(f, ht.WhiteQueenSideCastlingBitsMustBeClear)
+	printBitBoard(f, ht.BlackQueenSideCastlingBitsMustBeClear)
 	for i := 0; i < 64; i++ {
 		f.Write([]byte("\tBITBOARD LOOKUP:"))
 		printBitBoard(f, ht.SingleIndexBbHash[i])
@@ -341,8 +358,6 @@ func PrintAllBitboards(ht *HashTables) {
 }
 
 func printBitBoard(f *os.File, bb uint64) {
-	// bitboard, _ := bitboard.NewBitboard(bb)
-	// bitboard.Print()
 	nl := []byte("\n")
 	f.Write(nl)
 	var val int
