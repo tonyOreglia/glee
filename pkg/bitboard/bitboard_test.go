@@ -60,6 +60,11 @@ func TestBitboardPop(t *testing.T) {
 	assert.Equal(t, bitboard.Value(), uint64(0))
 }
 
+func TestIsZero(t *testing.T) {
+	assert.True(t, NewBitboard(0).IsZero())
+	assert.False(t, NewBitboard(1).IsZero())
+}
+
 func TestBitboardGetBit(t *testing.T) {
 	bitboard := NewBitboard(1)
 	assert.Equal(t, bitboard.BitIsSet(0), true)

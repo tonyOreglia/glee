@@ -77,7 +77,7 @@ func (b *Bitboard) RemoveOverlappingBits(bb *Bitboard) *Bitboard {
 }
 
 func (b *Bitboard) SetBit(bit int) error {
-	b.bitboard |= 1 << uint(bit)
+	b.bitboard |= uint64(1) << uint(bit)
 	return nil
 }
 

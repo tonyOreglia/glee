@@ -278,6 +278,7 @@ func TestGenerateMoves(t *testing.T) {
 				return mvs
 			},
 			assertion: func(mvs *moves.Moves, msg string) {
+				mvs.Print()
 				expectedMvs := [][]int{{60, 59}, {60, 58}}
 				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
 			},

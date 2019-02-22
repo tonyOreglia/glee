@@ -84,8 +84,7 @@ func GenerateKingMovesFromInitialPosition(pos *position.Position, mvsList *moves
 func GenerateKingMoves(pos *position.Position, mvsList *moves.Moves, ht *hashtables.HashTables) {
 	kingBb := pos.GetActiveSidesBitboards()[position.King]
 	kingPosition := kingBb.Lsb()
-	kingMovesLookup := bitboard.NewBitboard(ht.LegalKingMovesBbHash[pos.GetActiveSide()][kingPosition])
-	// validMovesBb := bitboard.NewBitboard(uint64(0))
+	kingMovesLookup := bitboard.NewBitboard(ht.LegalKingMovesNoCastlingBbHash[kingPosition])
 	validMovesBb := kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb())
 	// If king is in original position then check castling rights and if the sliding sq's are clear
 	if kingPosition == 4 {
@@ -108,17 +107,10 @@ func GenerateKingMoves(pos *position.Position, mvsList *moves.Moves, ht *hashtab
 		}
 		if pos.WhiteCanCastleQueenSide() {
 			if bitboard.ReturnBitwiseAnd(bitboard.NewBitboard(ht.WhiteQueenSideCastlingBitsMustBeClear), pos.AllOccupiedSqsBb()).IsZero() {
-				validMovesBb.SetBit(56)
+				validMovesBb.SetBit(58)
 			}
 		}
 	}
-
-	// if kingPosition == 4 || kingPosition == 60 {
-	// 	validMovesBb = GenerateKingMovesFromInitialPosition(pos, mvsList, ht)
-	// } else {
-	// 	validMovesBb = kingMovesLookup.RemoveOverlappingBits(pos.ActiveSideOccupiedSqsBb())
-	// }
-
 	addValidMovesToArray(mvsList, kingPosition, validMovesBb)
 }
 

@@ -57,6 +57,34 @@ func TestPositionUpdate(t *testing.T) {
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq - 1 1")
 }
 
+func TestWhiteCanCastleKingSide(t *testing.T) {
+	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K - 0 1")
+	assert.True(t, position.WhiteCanCastleKingSide())
+	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w k - 0 1")
+	assert.False(t, position.WhiteCanCastleKingSide())
+}
+
+func TestWhiteCanCastleQueenSide(t *testing.T) {
+	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Q - 0 1")
+	assert.True(t, position.WhiteCanCastleQueenSide())
+	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1")
+	assert.False(t, position.WhiteCanCastleQueenSide())
+}
+
+func TestBlackCanCastleKingSide(t *testing.T) {
+	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b k - 0 1")
+	assert.True(t, position.BlackCanCastleKingSide())
+	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b - - 0 1")
+	assert.False(t, position.BlackCanCastleKingSide())
+}
+
+func TestBlackCanCastleQueenSide(t *testing.T) {
+	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b q - 0 1")
+	assert.True(t, position.BlackCanCastleQueenSide())
+	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b Q - 0 1")
+	assert.False(t, position.BlackCanCastleQueenSide())
+}
+
 func TestUnMakeMove(t *testing.T) {
 	// unmake single move
 	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
