@@ -101,6 +101,28 @@ func TestGenerateMoves(t *testing.T) {
 				assert.Equal(t, 4, mvs.Length(), msg)
 			},
 		},
+		"white pawn blocked from moving to final rank": {
+			pos: "r3k2r/ppppPppp/8/8/8/8/8/K7 w - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 0, mvs.Length(), msg)
+			},
+		},
+		"black pawn blocked from reaching final rank": {
+			pos: "k7/8/8/8/8/8/PPPPpPPP/R3K2R b - - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GeneratePawnMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				assert.Equal(t, 0, mvs.Length(), msg)
+			},
+		},
 		"black pawns attacks en passante square": {
 			pos: "k7/8/8/8/6pP/8/8/K7 b - h3 0 1",
 			generateMoves: func(pos *position.Position) *moves.Moves {
@@ -424,6 +446,18 @@ func TestGenerateMoves(t *testing.T) {
 			},
 			assertion: func(mvs *moves.Moves, msg string) {
 				assert.Equal(t, 7, mvs.Length(), msg)
+			},
+		},
+		"pseudo legal moves allow king to castle out of check from pawn": {
+			pos: "r3k2r/ppppPppp/8/8/8/8/8/7K b kq - 0 1",
+			generateMoves: func(pos *position.Position) *moves.Moves {
+				mvs := moves.NewMovesList()
+				GenerateKingMoves(pos, mvs, ht)
+				return mvs
+			},
+			assertion: func(mvs *moves.Moves, msg string) {
+				expectedMvs := [][]int{{4, 12}, {4, 5}, {4, 3}, {4, 6}, {4, 2}}
+				assert.ElementsMatch(t, expectedMvs, mvs.GetMoves(), msg)
 			},
 		},
 		// ## BISHOP MOVES ##

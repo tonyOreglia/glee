@@ -33,7 +33,8 @@ func minMax(p searchParams) int {
 	if (*p.pos).IsWhitesTurn() {
 		p.evaluationScore = -30000
 	}
-	mvList := generate.GenerateMoves(*p.pos).GetMovesList()
+	mvs := generate.GenerateMoves(*p.pos)
+	mvList := mvs.GetMovesList()
 	for _, move := range mvList {
 		if !makeValidMove(move, p.pos) {
 			continue
@@ -88,7 +89,8 @@ func castlingMoveIsValid(move moves.Move, pos **position.Position) bool {
 	castlingSlidingSqBb := bitboard.NewBitboard(uint64(0))
 	castlingSlidingSqBb.SetBit(int(ht.LookupCastlingSlidingSqByDest[uint64(move.Destination())]))
 	castlingSlidingSqBb.Combine(kingPosition)
-	if (*pos).IsAttacked(*castlingSlidingSqBb, legalMoves.AttackedSqsBb()) {
+	pawnAttacks := generate.GeneratePotentialPawnAttacks(*pos, ht)
+	if (*pos).IsAttacked(*castlingSlidingSqBb, bitboard.ReturnCombined(legalMoves.AttackedSqsBb(), pawnAttacks.AttackedSqsBb())) {
 		return false
 	}
 	return true

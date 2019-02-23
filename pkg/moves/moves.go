@@ -57,8 +57,8 @@ func (m *Moves) Print() {
 	}
 }
 
-func (m *Moves) AttackedSqsBb() bitboard.Bitboard {
-	var bb bitboard.Bitboard
+func (m *Moves) AttackedSqsBb() *bitboard.Bitboard {
+	bb := new(bitboard.Bitboard)
 	for _, move := range m.mvs {
 		bb.SetBit(move.destination)
 	}

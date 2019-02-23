@@ -53,7 +53,7 @@ func TestPositionContructorFen(t *testing.T) {
 
 func TestPositionUpdate(t *testing.T) {
 	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-	position.MakeMoveAlgebraic("e2", "e3", White)
+	position.MakeMoveAlgebraic("e2", "e3")
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq - 1 1")
 }
 
@@ -88,15 +88,15 @@ func TestBlackCanCastleQueenSide(t *testing.T) {
 func TestUnMakeMove(t *testing.T) {
 	// unmake single move
 	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-	position.MakeMoveAlgebraic("e2", "e3", White)
+	position.MakeMoveAlgebraic("e2", "e3")
 	position = position.UnMakeMove()
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
 	// unmaking multiple moves in a row
 	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-	position.MakeMoveAlgebraic("e2", "e3", White)
-	position.MakeMoveAlgebraic("e7", "e6", Black)
-	position.MakeMoveAlgebraic("d2", "d4", White)
+	position.MakeMoveAlgebraic("e2", "e3")
+	position.MakeMoveAlgebraic("e7", "e6")
+	position.MakeMoveAlgebraic("d2", "d4")
 	assert.Equal(t, "rnbqkbnr/pppp1ppp/4p3/8/3P4/4P3/PPP2PPP/RNBQKBNR b KQkq d3 2 1", position.GetFenString())
 	position = position.UnMakeMove()
 	position = position.UnMakeMove()
@@ -105,43 +105,79 @@ func TestUnMakeMove(t *testing.T) {
 
 	// unmake attacking move
 	position, _ = NewPositionFen("7k/8/8/8/8/8/7p/6KR w q - 0 1")
-	position.MakeMoveAlgebraic("h1", "h2", White)
+	position.MakeMoveAlgebraic("h1", "h2")
 	assert.Equal(t, position.GetFenString(), "7k/8/8/8/8/8/7R/6K1 b q - 1 1")
 	position = position.UnMakeMove()
 	assert.Equal(t, position.GetFenString(), "7k/8/8/8/8/8/7p/6KR w q - 0 1")
 
 	//unmake en passante move
 	position, _ = NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-	position.MakeMoveAlgebraic("e2", "e4", White)
+	position.MakeMoveAlgebraic("e2", "e4")
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 1 1")
 	position = position.UnMakeMove()
 	assert.Equal(t, position.GetFenString(), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 }
 
 func TestCastling(t *testing.T) {
-	position, _ := NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
-	position.MakeMoveAlgebraic("e1", "g1", White)
-	assert.Equal(t, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R4RK1 b kq - 1 1", position.GetFenString())
-
-	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")
-	position.MakeMoveAlgebraic("e1", "c1", White)
-	assert.Equal(t, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/2KR3R b kq - 1 1", position.GetFenString())
-
-	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")
-	position.MakeMoveAlgebraic("e8", "g8", Black)
-	assert.Equal(t, "r4rk1/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1", position.GetFenString())
-
-	position, _ = NewPositionFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")
-	position.MakeMoveAlgebraic("e8", "c8", Black)
-	assert.Equal(t, "2kr3r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1", position.GetFenString())
+	tests := map[string]struct {
+		pos      string
+		move     [2]string
+		expected string
+	}{
+		"moving white king removes castling": {
+			pos:      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+			move:     [2]string{"e1", "g1"},
+			expected: "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R4RK1 b kq - 1 1",
+		},
+		"moving white king removes castling 2": {
+			pos:      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+			move:     [2]string{"e1", "c1"},
+			expected: "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/2KR3R b kq - 1 1",
+		},
+		"moving black king remove castling": {
+			pos:      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
+			move:     [2]string{"e8", "g8"},
+			expected: "r4rk1/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1",
+		},
+		"moving black king removes castling rights 2": {
+			pos:      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
+			move:     [2]string{"e8", "c8"},
+			expected: "2kr3r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQ - 0 1",
+		},
+		"moving white rook removes queenside castling rights": {
+			pos:      "r3k2r/p1ppqNb1/bn2pnp1/3P4/4P3/2p2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+			move:     [2]string{"a1", "b1"},
+			expected: "r3k2r/p1ppqNb1/bn2pnp1/3P4/4P3/2p2Q1p/PPPBBPPP/1R2K2R b Kkq - 1 1",
+		},
+		"moving white rook removes kingside castling rights": {
+			pos:      "r3k2r/p1ppqNb1/bn2pnp1/3P4/4P3/2p2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+			move:     [2]string{"h1", "g1"},
+			expected: "r3k2r/p1ppqNb1/bn2pnp1/3P4/4P3/2p2Q1p/PPPBBPPP/R3K1R1 b Qkq - 1 1",
+		},
+		"moving black rook removes queenside castling rights": {
+			pos:      "r3k2r/p1ppqNb1/bn2pnp1/3P4/4P3/2p2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
+			move:     [2]string{"a8", "b8"},
+			expected: "1r2k2r/p1ppqNb1/bn2pnp1/3P4/4P3/2p2Q1p/PPPBBPPP/R3K2R w KQk - 0 1",
+		},
+		"moving black rook removes kingside castling rights": {
+			pos:      "r3k2r/p1ppqNb1/bn2pnp1/3P4/4P3/2p2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
+			move:     [2]string{"h8", "g8"},
+			expected: "r3k1r1/p1ppqNb1/bn2pnp1/3P4/4P3/2p2Q1p/PPPBBPPP/R3K2R w KQq - 0 1",
+		},
+	}
+	for tName, test := range tests {
+		position, _ := NewPositionFen(test.pos)
+		position.MakeMoveAlgebraic(test.move[0], test.move[1])
+		assert.Equal(t, test.expected, position.GetFenString(), tName)
+		position = position.UnMakeMove()
+		assert.Equal(t, test.pos, position.GetFenString(), tName)
+	}
 }
 
-func TestPrintPos(t *testing.T) {
-	position, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-	position.Print()
-	position, _ = NewPositionFen("7k/8/8/8/8/8/7p/6KR w q - 0 1")
-	position.Print()
-	assert.Equal(t, 1, 1)
+func TestEnPassanteAttackMove(t *testing.T) {
+	position, _ := NewPositionFen("r3k2r/p1ppqNb1/1n2pnp1/1b1P4/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a3 0 1")
+	position.MakeMoveAlgebraic("b4", "a3")
+	assert.Equal(t, "r3k2r/p1ppqNb1/1n2pnp1/1b1P4/4P3/p1N2Q1p/1PPBBPPP/R3K2R w KQkq - 0 1", position.GetFenString())
 }
 
 func TestIsCastlingMove(t *testing.T) {

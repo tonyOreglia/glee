@@ -167,10 +167,10 @@ func (p *Position) promotePawn(sq int, piece int, sideToMove int) {
 func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 	p.previousPos = p.Copy()
 	// double pawn push move, set en passante
-	if p.bitboards[p.activeSide][Pawns].BitIsSet(originIndex) && terminusIndex-originIndex == -16 || terminusIndex-originIndex == 16 {
+	p.enPassanteSq = 64
+	doublePawnPush := p.bitboards[p.activeSide][Pawns].BitIsSet(originIndex) && (terminusIndex-originIndex == -16 || terminusIndex-originIndex == 16)
+	if doublePawnPush {
 		p.enPassanteSq = (terminusIndex-originIndex)/2 + originIndex
-	} else {
-		p.enPassanteSq = 64
 	}
 	movingPiece := p.updateMovingSidesBbs(originIndex, terminusIndex)
 
@@ -205,6 +205,14 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 			p.revokeQueenSideCastlingRight()
 		}
 	}
+	enPassanteAttack := movingPiece == Pawns && (terminusIndex-originIndex)%8 != 0 && attackedPiece == 0
+	if enPassanteAttack {
+		capturnedPawnIndex := terminusIndex + 8
+		if originIndex >= 32 && originIndex < 40 {
+			capturnedPawnIndex = terminusIndex - 8
+		}
+		p.removeAttackedPieceFromBbs(capturnedPawnIndex)
+	}
 	p.updatedOccupiedSqBitboard(p.activeSide)
 	if p.activeSide == Black {
 		p.moveCt++
@@ -212,14 +220,14 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 }
 
 // MakeMove updates position with single chess move
-func (p *Position) MakeMoveAlgebraic(origin string, terminus string, activeSide int) {
+func (p *Position) MakeMoveAlgebraic(origin string, terminus string) {
 	originIndex := convertAlgebriacToIndex(origin)
 	terminusIndex := convertAlgebriacToIndex(terminus)
 	p.MakeMove(originIndex, terminusIndex)
 }
 
-func (p *Position) IsAttacked(kingBb bitboard.Bitboard, destSqsBb bitboard.Bitboard) bool {
-	return kingBb.BitwiseAnd(&destSqsBb).Value() != uint64(0)
+func (p *Position) IsAttacked(kingBb bitboard.Bitboard, destSqsBb *bitboard.Bitboard) bool {
+	return kingBb.BitwiseAnd(destSqsBb).Value() != uint64(0)
 }
 
 func (p *Position) IsCastlingMove(mv moves.Move) bool {
