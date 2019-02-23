@@ -95,3 +95,126 @@ func castlingMoveIsValid(move moves.Move, pos **position.Position) bool {
 	}
 	return true
 }
+
+func alphaBetaMax(alpha int, beta int, p searchParams) int {
+	noMoves := true
+	if p.ply == 0 {
+		return evaluate.EvaluatePosition(*p.pos, p.singlePlyPerft)
+	}
+	p.root = p.ply == p.depth
+	mvs := generate.GenerateMoves(*p.pos).GetMovesList()
+	for _, move := range mvs {
+		if !makeValidMove(move, p.pos) {
+			noMoves = false
+			p.ply = p.ply - 1
+			score := alphaBetaMin(alpha, beta, p)
+			(*p.pos).UnMakeMove()
+			if score >= beta {
+				return beta
+			}
+			if score > alpha {
+				alpha = score
+				if p.root {
+					p.engineMove = &move
+				}
+			}
+		}
+	}
+	if noMoves {
+		// check for mate situation
+		return -2500
+	}
+	return alpha
+}
+
+func alphaBetaMin(alpha int, beta int, p searchParams) int {
+	noMoves := true
+	if p.ply == 0 {
+		return evaluate.EvaluatePosition(*p.pos, p.singlePlyPerft)
+	}
+	p.root = p.ply == p.depth
+	mvs := generate.GenerateMoves(*p.pos).GetMovesList()
+	for _, move := range mvs {
+		if !makeValidMove(move, p.pos) {
+			noMoves = false
+			p.ply = p.ply - 1
+			score := alphaBetaMin(alpha, beta, p)
+			(*p.pos).UnMakeMove()
+			if score <= alpha {
+				return alpha
+			}
+			if score < beta {
+				beta = score
+				if p.root {
+					p.engineMove = &move
+				}
+			}
+		}
+	}
+	if noMoves {
+		// check for mate situation
+		return 2500
+	}
+	return beta
+}
+
+// func alphaBetaMax(int alpha, int beta, char depth, int start) {
+// 	bool no_moves = true;
+// 	if(depth == 0) return evaluate(); //even: light. odd: dark
+// 	bool root = depth == DEPTH;
+// 	int total = position->move_t.size();
+// 	if(root) {
+// 			move_count = position->move_t.size();
+// 	}
+// 	for(int j = start; j < total; j++) {
+// 			if(make_move(j)) {
+// 					no_moves = false;
+// 					score = alpha_beta_min(alpha, beta, depth - 1, total);
+// 					unmake_move();
+// 					position->clear_moves(total, position->move_t.size());
+// 					if(score >= beta)
+// 							return beta;
+// 					if(score > alpha) {
+// 							alpha = score;
+// 							if(root) engine_move = j;
+// 					}
+// 			}
+// 	}
+// 	if(no_moves) {
+// 			if(mate_check()) {
+// 					return (-25000 - depth);
+// 			}
+// 	}
+// 	return alpha;
+// }
+
+// int game::alpha_beta_min(int alpha, int beta, char depth, int start) {
+// 	bool no_moves = true;
+// 	if( depth == 0) return evaluate(); //even: dark. odd: light
+// 	bool root = depth == DEPTH;
+// 	int total = position->move_t.size();
+// 	if(root) {
+// 			move_count = position->move_t.size();
+// 	}
+// 	for(int j=start; j < total; j++) {
+// 			if(make_move(j)) {
+// 					no_moves = false;
+// 					score = alpha_beta_max(alpha, beta, depth - 1, total);
+// 					unmake_move();
+// 					position->clear_moves(total, position->move_t.size());
+// 					if(score <= alpha)
+// 							return alpha;
+// 					if(score < beta) {
+// 							beta = score;
+// 							if(root) engine_move = j;
+// 					}
+// 			}
+// 	}
+// 	if(no_moves) {
+// 			if(mate_check()) {
+// 					return (25000 + depth);
+// 			}
+// 					//return 1000 + depth;
+// 	}
+// 	return beta;
+// }
