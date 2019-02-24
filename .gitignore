@@ -13,6 +13,3 @@
 
 # Ignore IDE settings
 .vscode/*
-
-# Ignore executable
-glee

@@ -73,6 +73,15 @@ func (m *Moves) GetMoves() [][]int {
 	return mvList
 }
 
+func (m *Moves) FindMove(origin int, dest int) bool {
+	for _, move := range m.mvs {
+		if move.origin == origin && move.destination == dest {
+			return true
+		}
+	}
+	return false
+}
+
 // NewBbFromMovesSlice takes a legal moves slice and returns a bitboard representing those moves
 func (m *Moves) GetBitboard() *bitboard.Bitboard {
 	bitboard := &bitboard.Bitboard{}
