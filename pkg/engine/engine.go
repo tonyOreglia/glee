@@ -27,7 +27,8 @@ type searchParams struct {
 func minMax(p searchParams) int {
 	p.root = p.ply == p.depth
 	if p.ply == 0 {
-		return evaluate.EvaluatePosition(*p.pos, p.singlePlyPerft)
+		*p.singlePlyPerft++
+		return evaluate.EvaluatePosition(*p.pos)
 	}
 	p.evaluationScore = 30000
 	if (*p.pos).IsWhitesTurn() {
@@ -99,7 +100,8 @@ func castlingMoveIsValid(move moves.Move, pos **position.Position) bool {
 func alphaBetaMax(alpha int, beta int, p searchParams) int {
 	noMoves := true
 	if p.ply == 0 {
-		return evaluate.EvaluatePosition(*p.pos, p.singlePlyPerft)
+		*p.singlePlyPerft++
+		return evaluate.EvaluatePosition(*p.pos)
 	}
 	p.root = p.ply == p.depth
 	mvs := generate.GenerateMoves(*p.pos).GetMovesList()
@@ -130,7 +132,8 @@ func alphaBetaMax(alpha int, beta int, p searchParams) int {
 func alphaBetaMin(alpha int, beta int, p searchParams) int {
 	noMoves := true
 	if p.ply == 0 {
-		return evaluate.EvaluatePosition(*p.pos, p.singlePlyPerft)
+		*p.singlePlyPerft++
+		return evaluate.EvaluatePosition(*p.pos)
 	}
 	p.root = p.ply == p.depth
 	mvs := generate.GenerateMoves(*p.pos).GetMovesList()

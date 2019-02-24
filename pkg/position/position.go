@@ -47,6 +47,11 @@ type Position struct {
 	previousPos    *Position
 }
 
+func StartingPosition() *Position {
+	p, _ := NewPositionFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+	return p
+}
+
 // NewPositionFen constructs Position struct instance from Forth-Edwards Notation string
 func NewPositionFen(fen string) (*Position, error) {
 	p := new(Position)
@@ -319,6 +324,10 @@ func (p *Position) GetFenString() string {
 		" " + strconv.Itoa(p.moveCt) +
 		" " + strconv.Itoa(p.halfMoveCt)
 	return fenPosition
+}
+
+func (p *Position) PrintFen() {
+	fmt.Println(p.GetFenString())
 }
 
 func (p *Position) convertEnPassanteSqToFenString() string {
@@ -631,6 +640,7 @@ func convertBitboardsToFenString(bb [2][]bitboard.Bitboard) string {
 }
 
 func (p *Position) Print() {
+	fmt.Println()
 	bb := p.bitboards
 	fenString := ""
 	emptySqs := 0
@@ -638,7 +648,11 @@ func (p *Position) Print() {
 		getRowString(rank, &fenString, &emptySqs, bb)
 		fenString = ""
 	}
-	fmt.Print("\n\n")
+	turn := "black"
+	if p.activeSide == White {
+		turn = "white"
+	}
+	fmt.Printf("\nmove: %d, turn: %s\ncastling: %s, ep-file: %s\n\n", p.moveCt, turn, p.convertCastlingRightsToFenString(), p.convertEnPassanteSqToFenString())
 }
 
 func defaultSingleIndexConversionToCharacter(index int, file int, fenString *string, emptySqs *int, bb [2][]bitboard.Bitboard) {
