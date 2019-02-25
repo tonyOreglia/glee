@@ -53,9 +53,38 @@ func main() {
 			mvs = generate.GenerateMoves(pos)
 		case "setboard":
 			setboard(pos)
+		case "playw":
+			pos = position.StartingPosition()
+			play(pos, 0)
+		case "playb":
+			pos = position.StartingPosition()
+			play(pos, 1)
 		default:
 			handleMove(c, pos, mvs)
 			mvs = generate.GenerateMoves(pos)
+		}
+	}
+}
+
+func play(p *position.Position, humanSide int) {
+	move := make([]byte, 0, 100)
+	for true {
+		if p.GetActiveSide() == humanSide {
+			for true {
+				fmt.Print("move: ")
+				_, err := fmt.Scan(&move)
+				if err != nil {
+					fmt.Print(err)
+				}
+				if string(move) == "quit" {
+					os.Exit(0)
+				}
+				if handleMove(string(move), p, generate.GenerateMoves(p)) {
+					break
+				}
+			}
+		} else {
+			search(p, generate.GenerateMoves(p))
 		}
 	}
 }
@@ -93,6 +122,9 @@ func printHelp() {
 	fmt.Println("undo............takes back last move")
 	fmt.Println("new.............resets board to initial state")
 	fmt.Println("disp............shows the board")
+	fmt.Println("search..........engine plays the current position")
+	fmt.Println("playw...........play white vs engine as black")
+	fmt.Println("playb...........play black vs engine as white")
 	// fmt.Println("divide #........outputs the numbers of child moves")
 	// fmt.Println("divide2 #.......outputs the total numbers of child moves")
 	// fmt.Println("perft #.........counts nodes at given depth")
@@ -121,7 +153,7 @@ func setboard(p *position.Position) {
 	p.Print()
 }
 
-func handleMove(mv string, p *position.Position, mvs *moves.Moves) {
+func handleMove(mv string, p *position.Position, mvs *moves.Moves) bool {
 	lookupPromo := map[string]int{
 		// Queen = 2 Bishops = 3 Knights = 4 Rooks = 5
 		"Q": 2,
@@ -132,7 +164,7 @@ func handleMove(mv string, p *position.Position, mvs *moves.Moves) {
 	promotionPiece := 0
 	if len(mv) != 4 && len(mv) != 5 {
 		badInput(mv)
-		return
+		return false
 	}
 	if len(mv) == 5 {
 		promotionPiece = lookupPromo[string(mv[4])]
@@ -140,23 +172,24 @@ func handleMove(mv string, p *position.Position, mvs *moves.Moves) {
 	origin, err := utility.ConvertAlgebriacToIndex(mv[0:2])
 	if err != nil {
 		badInput(mv)
-		return
+		return false
 	}
 	dest, err := utility.ConvertAlgebriacToIndex(mv[2:4])
 	if err != nil {
 		badInput(mv)
-		return
+		return false
 	}
 	move, found := mvs.FindMove(origin, dest, promotionPiece)
 	if !found {
 		badInput(mv)
-		return
+		return false
 	}
 	if !engine.MakeValidMove(move, &p) {
 		badInput(mv)
-		return
+		return false
 	}
 	p.Print()
+	return true
 }
 
 func uci() {
