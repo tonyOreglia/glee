@@ -12,6 +12,7 @@ import (
 	"github.com/tonyOreglia/glee/pkg/bitboard"
 	"github.com/tonyOreglia/glee/pkg/hashtables"
 	"github.com/tonyOreglia/glee/pkg/moves"
+	"github.com/tonyOreglia/glee/pkg/utility"
 )
 
 // don't worry, this does not cause hash tables to be generated more than once
@@ -226,8 +227,8 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 
 // MakeMove updates position with single chess move
 func (p *Position) MakeMoveAlgebraic(origin string, terminus string) {
-	originIndex := convertAlgebriacToIndex(origin)
-	terminusIndex := convertAlgebriacToIndex(terminus)
+	originIndex, _ := utility.ConvertAlgebriacToIndex(origin)
+	terminusIndex, _ := utility.ConvertAlgebriacToIndex(terminus)
 	p.MakeMove(originIndex, terminusIndex)
 }
 
@@ -485,7 +486,7 @@ func getFenStringTokens(fen string) (string, int, string, int, int, int) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	enPassnantSq := convertAlgebriacToIndex(fenTokens[3])
+	enPassnantSq, _ := utility.ConvertAlgebriacToIndex(fenTokens[3])
 	switch fenTokens[1] {
 	case "w":
 		activeSide = White
@@ -521,37 +522,6 @@ func validateFenTokens(Position string, activeSide int, castlingRights string, e
 		return errors.New("invalid active side encoded in FEN string")
 	}
 	return nil
-}
-
-func convertAlgebriacToIndex(algebraic string) int {
-	if algebraic == "-" {
-		return 64
-	}
-	column := string(algebraic[0])
-	row, _ := strconv.Atoi(string(algebraic[1]))
-	row--
-	var index, columnValue, rowValue int
-	switch column {
-	case "a":
-		columnValue = 0
-	case "b":
-		columnValue = 1
-	case "c":
-		columnValue = 2
-	case "d":
-		columnValue = 3
-	case "e":
-		columnValue = 4
-	case "f":
-		columnValue = 5
-	case "g":
-		columnValue = 6
-	case "h":
-		columnValue = 7
-	}
-	rowValue = ((7 - row) * 8)
-	index = columnValue + rowValue
-	return index
 }
 
 func convertIndexToAlgebraic(index int) string {

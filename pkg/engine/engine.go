@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"fmt"
-
 	"github.com/tonyOreglia/glee/pkg/bitboard"
 	"github.com/tonyOreglia/glee/pkg/evaluate"
 	"github.com/tonyOreglia/glee/pkg/generate"
@@ -13,60 +11,60 @@ import (
 
 var ht = hashtables.Lookup
 
-type searchParams struct {
-	depth           int
-	ply             int
-	pos             **position.Position
-	engineMove      *moves.Move
-	perft           *int
-	singlePlyPerft  *int
-	evaluationScore int
-	root            bool
+type SearchParams struct {
+	Depth           int
+	Ply             int
+	Pos             **position.Position
+	EngineMove      *moves.Move
+	Perft           *int
+	SinglePlyPerft  *int
+	EvaluationScore int
+	Root            bool
 }
 
-func minMax(p searchParams) int {
-	p.root = p.ply == p.depth
-	if p.ply == 0 {
-		*p.singlePlyPerft++
-		return evaluate.EvaluatePosition(*p.pos)
+func MinMax(p SearchParams) int {
+	p.Root = p.Ply == p.Depth
+	if p.Ply == 0 {
+		*p.SinglePlyPerft++
+		return evaluate.EvaluatePosition(*p.Pos)
 	}
-	p.evaluationScore = 30000
-	if (*p.pos).IsWhitesTurn() {
-		p.evaluationScore = -30000
+	p.EvaluationScore = 30000
+	if (*p.Pos).IsWhitesTurn() {
+		p.EvaluationScore = -30000
 	}
-	mvs := generate.GenerateMoves(*p.pos)
+	mvs := generate.GenerateMoves(*p.Pos)
 	mvList := mvs.GetMovesList()
 	for _, move := range mvList {
-		if !makeValidMove(move, p.pos) {
+		if !MakeValidMove(move, p.Pos) {
 			continue
 		}
 		evaluateMove(move, p)
 	}
-	return p.evaluationScore
+	return p.EvaluationScore
 }
 
 // evaluateMove checks if pseudo legal move is valid, and if so
-// increments ply and calls minMax to continue the search
-func evaluateMove(move moves.Move, p searchParams) error {
-	p.ply = p.ply - 1
-	temp := minMax(p)
-	if temp > p.evaluationScore {
-		p.evaluationScore = temp
-		if p.root {
-			p.engineMove = move.CopyMove()
+// increments Ply and calls MinMax to continue the search
+func evaluateMove(move moves.Move, p SearchParams) error {
+	p.Ply = p.Ply - 1
+	temp := MinMax(p)
+	if temp > p.EvaluationScore {
+		p.EvaluationScore = temp
+		if p.Root {
+			*p.EngineMove = move
 		}
 	}
-	if p.root {
-		move.Print()
-		fmt.Println(*p.singlePlyPerft)
-		*p.perft += *p.singlePlyPerft
-		*p.singlePlyPerft = 0
+	if p.Root {
+		// move.Print()
+		// fmt.Println(*p.SinglePlyPerft)
+		*p.Perft += *p.SinglePlyPerft
+		*p.SinglePlyPerft = 0
 	}
-	*p.pos = (*p.pos).UnMakeMove()
+	*p.Pos = (*p.Pos).UnMakeMove()
 	return nil
 }
 
-func makeValidMove(move moves.Move, pos **position.Position) bool {
+func MakeValidMove(move moves.Move, pos **position.Position) bool {
 	if (*pos).IsCastlingMove(move) {
 		(*pos).Move(move)
 		if !castlingMoveIsValid(move, pos) {
@@ -97,27 +95,25 @@ func castlingMoveIsValid(move moves.Move, pos **position.Position) bool {
 	return true
 }
 
-func alphaBetaMax(alpha int, beta int, p searchParams) int {
+func AlphaBetaMax(alpha int, beta int, ply int, p SearchParams) int {
 	noMoves := true
-	if p.ply == 0 {
-		*p.singlePlyPerft++
-		return evaluate.EvaluatePosition(*p.pos)
+	if ply == 0 {
+		return evaluate.EvaluatePosition(*p.Pos)
 	}
-	p.root = p.ply == p.depth
-	mvs := generate.GenerateMoves(*p.pos).GetMovesList()
+	p.Root = ply == p.Depth
+	mvs := generate.GenerateMoves(*p.Pos).GetMovesList()
 	for _, move := range mvs {
-		if !makeValidMove(move, p.pos) {
+		if MakeValidMove(move, p.Pos) {
 			noMoves = false
-			p.ply = p.ply - 1
-			score := alphaBetaMin(alpha, beta, p)
-			(*p.pos).UnMakeMove()
+			score := AlphaBetaMin(alpha, beta, ply-1, p)
+			*p.Pos = (*p.Pos).UnMakeMove()
 			if score >= beta {
 				return beta
 			}
 			if score > alpha {
 				alpha = score
-				if p.root {
-					p.engineMove = &move
+				if p.Root {
+					*p.EngineMove = move
 				}
 			}
 		}
@@ -129,27 +125,25 @@ func alphaBetaMax(alpha int, beta int, p searchParams) int {
 	return alpha
 }
 
-func alphaBetaMin(alpha int, beta int, p searchParams) int {
+func AlphaBetaMin(alpha int, beta int, ply int, p SearchParams) int {
 	noMoves := true
-	if p.ply == 0 {
-		*p.singlePlyPerft++
-		return evaluate.EvaluatePosition(*p.pos)
+	if ply == 0 {
+		return evaluate.EvaluatePosition(*p.Pos)
 	}
-	p.root = p.ply == p.depth
-	mvs := generate.GenerateMoves(*p.pos).GetMovesList()
+	p.Root = ply == p.Depth
+	mvs := generate.GenerateMoves(*p.Pos).GetMovesList()
 	for _, move := range mvs {
-		if !makeValidMove(move, p.pos) {
+		if MakeValidMove(move, p.Pos) {
 			noMoves = false
-			p.ply = p.ply - 1
-			score := alphaBetaMin(alpha, beta, p)
-			(*p.pos).UnMakeMove()
+			score := AlphaBetaMax(alpha, beta, ply-1, p)
+			*p.Pos = (*p.Pos).UnMakeMove()
 			if score <= alpha {
 				return alpha
 			}
 			if score < beta {
 				beta = score
-				if p.root {
-					p.engineMove = &move
+				if p.Root {
+					*p.EngineMove = move
 				}
 			}
 		}

@@ -7,15 +7,6 @@ import (
 	"github.com/tonyOreglia/glee/pkg/moves"
 )
 
-func TestConvertAlgebriacToIndex(t *testing.T) {
-	index := convertAlgebriacToIndex("a8")
-	assert.Equal(t, 0, index)
-	index = convertAlgebriacToIndex("h1")
-	assert.Equal(t, 63, index)
-	index = convertAlgebriacToIndex("h8")
-	assert.Equal(t, 7, index)
-}
-
 func TestTokenizeFen(t *testing.T) {
 	position, activeSide, castlingRights, enPassante, moveCt, halfMoveCt := getFenStringTokens("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 	assert.Equal(t, position, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")

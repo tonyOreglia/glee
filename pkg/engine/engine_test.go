@@ -50,12 +50,12 @@ func TestMinMax(t *testing.T) {
 	for _, tt := range flagtests {
 		perft, singlePlyPerft := setup()
 		pos, _ := position.NewPositionFen(tt.fen)
-		minMax(searchParams{
-			depth:          tt.depth,
-			ply:            tt.depth,
-			pos:            &pos,
-			perft:          &perft,
-			singlePlyPerft: &singlePlyPerft,
+		MinMax(SearchParams{
+			Depth:          tt.depth,
+			Ply:            tt.depth,
+			Pos:            &pos,
+			Perft:          &perft,
+			SinglePlyPerft: &singlePlyPerft,
 		})
 		assert.Equal(t, tt.expectedNodes, perft, tt.name)
 	}
@@ -180,6 +180,6 @@ func TestMakeValidMove(t *testing.T) {
 	}
 	for tName, test := range tests {
 		pos, _ := position.NewPositionFen(test.pos)
-		assert.Equal(t, test.legal, makeValidMove(*test.move, &pos), tName)
+		assert.Equal(t, test.legal, MakeValidMove(*test.move, &pos), tName)
 	}
 }

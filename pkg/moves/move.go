@@ -14,7 +14,7 @@ type Move struct {
 }
 
 func NewMove(singleMove []int) *Move {
-	mv := &Move{origin: singleMove[0], destination: singleMove[1]}
+	mv := &Move{origin: singleMove[0], destination: singleMove[1], promotion: 0}
 	return mv
 }
 
@@ -45,5 +45,5 @@ func (m *Move) PromotionPiece() int {
 }
 
 func (m *Move) Print() {
-	fmt.Print(utility.ConvertIndexToAlgebraic(m.origin), utility.ConvertIndexToAlgebraic(m.destination), " ")
+	fmt.Println(utility.ConvertIndexToAlgebraic(m.origin), utility.ConvertIndexToAlgebraic(m.destination), " ")
 }
