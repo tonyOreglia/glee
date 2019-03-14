@@ -12,7 +12,6 @@ import (
 	"github.com/tonyOreglia/glee/pkg/bitboard"
 	"github.com/tonyOreglia/glee/pkg/hashtables"
 	"github.com/tonyOreglia/glee/pkg/moves"
-	"github.com/tonyOreglia/glee/pkg/utility"
 )
 
 // don't worry, this does not cause hash tables to be generated more than once
@@ -227,8 +226,8 @@ func (p *Position) MakeMove(originIndex int, terminusIndex int) {
 
 // MakeMove updates position with single chess move
 func (p *Position) MakeMoveAlgebraic(origin string, terminus string) {
-	originIndex, _ := utility.ConvertAlgebriacToIndex(origin)
-	terminusIndex, _ := utility.ConvertAlgebriacToIndex(terminus)
+	originIndex, _ := moves.ConvertAlgebriacToIndex(origin)
+	terminusIndex, _ := moves.ConvertAlgebriacToIndex(terminus)
 	p.MakeMove(originIndex, terminusIndex)
 }
 
@@ -486,7 +485,7 @@ func getFenStringTokens(fen string) (string, int, string, int, int, int) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	enPassnantSq, _ := utility.ConvertAlgebriacToIndex(fenTokens[3])
+	enPassnantSq, _ := moves.ConvertAlgebriacToIndex(fenTokens[3])
 	switch fenTokens[1] {
 	case "w":
 		activeSide = White

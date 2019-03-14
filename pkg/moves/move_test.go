@@ -21,3 +21,12 @@ func TestMoveConstructor(t *testing.T) {
 	assert.Equal(t, mv.PromotionPiece(), 3)
 	assert.Equal(t, mv.GetMoveSlice(), []int{62, 63})
 }
+
+func TestConvertAlgebriacToIndex(t *testing.T) {
+	index, _ := ConvertAlgebriacToIndex("a8")
+	assert.Equal(t, 0, index)
+	index, _ = ConvertAlgebriacToIndex("h1")
+	assert.Equal(t, 63, index)
+	index, _ = ConvertAlgebriacToIndex("h8")
+	assert.Equal(t, 7, index)
+}
