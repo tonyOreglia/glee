@@ -14,46 +14,33 @@ import (
 
 // UCI interacts with a UCI compatible chess UI
 func (w *WebsocketServer) UCI(rw http.ResponseWriter, r *http.Request) {
-
 	var err error
-	log.Info("UCI websocket opened")
 	w.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	w.conn, err = w.upgrader.Upgrade(rw, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
+	log.Info("websocket conection established")
 	pos := position.StartingPosition()
 	var move *moves.Move
-	w.Write("GLEE-GoLang chEss Engine")
-	w.Write("tony.oreglia@gmail.com")
-	w.Write("id name Glee 0.0.1")
-	w.Write("id author Tony Oreglia")
-	w.Write("uciok")
-
-	// for true {
-	// 	_, message, err := w.conn.ReadMessage()
-	// 	if err != nil {
-	// 		log.Println("read error:", err)
-	// 		break
-	// 	}
-	// 	log.Printf("recv: %s", message)
-	// 	channel <- string(message)
-	// }
-
 	for true {
 		_, commands, err := w.conn.ReadMessage()
 		if err != nil {
 			log.Println("read error:", err)
 			break
 		}
-
-		// severReadChan := make(chan string)
-		// go w.StartReader(severReadChan) // returns values to p.Chan
-		// commands := <-severReadChan // reads in a full line
 		commandTokens := strings.Split(string(commands), " ")
 		command := commandTokens[0]
+		log.Infof("Got command %s", string(commands))
 		switch string(command) {
+		case "uci":
+			log.Info("executing uci response")
+			w.Write("GLEE-GoLang chEss Engine")
+			w.Write("tony.oreglia@gmail.com")
+			w.Write("id name GLEE (GoLang chEss Engine) 0.0.1")
+			w.Write("id author Tony Oreglia")
+			w.Write("uciok")
 		case "debug":
 			w.Write("not yet implemented")
 		case "isready":
@@ -71,6 +58,7 @@ func (w *WebsocketServer) UCI(rw http.ResponseWriter, r *http.Request) {
 		case "ucinewgame":
 			pos = position.StartingPosition()
 		case "position":
+			log.Info("setting engine position")
 			pos = setPositionUCI(pos, commandTokens)
 			pos.Print()
 		case "go":
@@ -113,23 +101,21 @@ func (w *WebsocketServer) UCI(rw http.ResponseWriter, r *http.Request) {
 }
 
 func setPositionUCI(p *position.Position, posCommandTokens []string) *position.Position {
-	// in := bufio.NewReader(os.Stdin)
-	// UCIPosition, err := in.ReadString('\n')
-	// if err != nil {
-	// 	log.Fatal("unable to read position string", err.Error())
-	// }
-	log.Infof("Setting position: %s", strings.Join(posCommandTokens, ","))
+	log.Infof("Setting position: %s", strings.Join(posCommandTokens, " "))
 	var err error
 	UCIPositionTokens := posCommandTokens[1:]
-	// UCIPositionTokens := strings.Split(UCIPosition, " ")
-
 	for i, posToken := range UCIPositionTokens {
-		log.Infof("handling token %s", posToken)
+		log.Infof("handling position token %s", posToken)
 		if i == 0 {
 			if posToken == "startpos" {
 				p = position.StartingPosition()
 			} else {
-				p, err = position.NewPositionFen(posToken)
+				if len(UCIPositionTokens) < 6 {
+					log.Errorf("invalid position: %s", strings.Join(posCommandTokens, " "))
+					return nil
+				}
+				fenString := strings.Join(UCIPositionTokens[0:6], " ")
+				p, err = position.NewPositionFen(fenString)
 				if err != nil {
 					badInput(strings.Join(UCIPositionTokens, " "))
 					return p

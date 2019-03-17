@@ -50,14 +50,3 @@ func (w *WebsocketServer) Write(msg string) {
 		log.Println("write:", err)
 	}
 }
-
-// func (w *WebsocketServer) uci(rw http.ResponseWriter, r *http.Request) {
-// 	var err error
-// 	log.Info("UCI websocket opened")
-// 	w.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-// 	w.conn, err = w.upgrader.Upgrade(rw, r, nil)
-// 	if err != nil {
-// 		log.Print("upgrade:", err)
-// 		return
-// 	}
-// }
