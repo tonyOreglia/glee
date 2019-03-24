@@ -25,6 +25,13 @@ func NewWebsocketServer() *WebsocketServer {
 }
 
 func (w *WebsocketServer) uciHandler(rw http.ResponseWriter, r *http.Request) {
+	var err error
+	w.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	w.conn, err = w.upgrader.Upgrade(rw, r, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
 	go w.UCI(rw, r)
 }
 

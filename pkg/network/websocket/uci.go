@@ -14,13 +14,7 @@ import (
 
 // UCI interacts with a UCI compatible chess UI
 func (w *WebsocketServer) UCI(rw http.ResponseWriter, r *http.Request) {
-	var err error
-	w.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	w.conn, err = w.upgrader.Upgrade(rw, r, nil)
-	if err != nil {
-		log.Print("upgrade:", err)
-		return
-	}
+	defer w.conn.Close()
 	log.Info("websocket conection established")
 	pos := position.StartingPosition()
 	var move *moves.Move
