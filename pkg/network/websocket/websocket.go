@@ -17,7 +17,7 @@ type WebsocketServer struct {
 
 func NewWebsocketServer() *WebsocketServer {
 	w := new(WebsocketServer)
-	w.addr = flag.String("addr", "localhost:8081", "http service address")
+	w.addr = flag.String("addr", "206.189.195.210:8081", "http service address")
 	flag.Parse()
 	w.upgrader = websocket.Upgrader{} // use default options
 	http.HandleFunc("/uci", w.uciHandler)
