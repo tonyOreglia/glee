@@ -1,9 +1,9 @@
 package websocket
 
 import (
-	"flag"
 	"net/http"
 
+	"github.com/namsral/flag"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
@@ -12,12 +12,11 @@ import (
 type WebsocketServer struct {
 	upgrader websocket.Upgrader
 	addr     *string
-	conn     *websocket.Conn
 }
 
 func NewWebsocketServer() *WebsocketServer {
 	w := new(WebsocketServer)
-	w.addr = flag.String("addr", "206.189.195.210:8081", "http service address")
+	w.addr = flag.String("addr", "localhost:8081", "http service address")
 	flag.Parse()
 	w.upgrader = websocket.Upgrader{} // use default options
 	http.HandleFunc("/uci", w.uciHandler)
@@ -25,38 +24,23 @@ func NewWebsocketServer() *WebsocketServer {
 }
 
 func (w *WebsocketServer) uciHandler(rw http.ResponseWriter, r *http.Request) {
-	var err error
+	log.Error("upgrading to websocket connection")
 	w.upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	w.conn, err = w.upgrader.Upgrade(rw, r, nil)
+	conn, err := w.upgrader.Upgrade(rw, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
-	go w.UCI(rw, r)
+	go w.UCI(rw, r, conn)
 }
 
 func (w *WebsocketServer) Start() {
+	log.Info("starting websocket server")
 	http.ListenAndServe(*w.addr, nil)
 }
 
-func (w *WebsocketServer) CloseConnection() {
-	w.conn.Close()
-}
-
-func (w *WebsocketServer) StartReader(channel chan string) {
-	for {
-		_, message, err := w.conn.ReadMessage()
-		if err != nil {
-			log.Println("read error:", err)
-			break
-		}
-		log.Printf("recv: %s", message)
-		channel <- string(message)
-	}
-}
-
-func (w *WebsocketServer) Write(msg string) {
-	err := w.conn.WriteMessage(websocket.TextMessage, []byte(msg))
+func Write(conn *websocket.Conn, msg string) {
+	err := conn.WriteMessage(websocket.TextMessage, []byte(msg))
 	if err != nil {
 		log.Println("write:", err)
 	}
