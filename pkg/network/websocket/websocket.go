@@ -16,7 +16,7 @@ type WebsocketServer struct {
 
 func NewWebsocketServer() *WebsocketServer {
 	w := new(WebsocketServer)
-	w.addr = flag.String("addr", "localhost:8081", "http service address")
+	w.addr = flag.String("addr", "localhost:8081", "http websocket service address")
 	flag.Parse()
 	w.upgrader = websocket.Upgrader{} // use default options
 	http.HandleFunc("/uci", w.uciHandler)
@@ -36,7 +36,7 @@ func (w *WebsocketServer) uciHandler(rw http.ResponseWriter, r *http.Request) {
 
 func (w *WebsocketServer) Start() {
 	log.Info("starting websocket server")
-	http.ListenAndServe(*w.addr, nil)
+	log.Fatal(http.ListenAndServe(*w.addr, nil))
 }
 
 func Write(conn *websocket.Conn, msg string) {
