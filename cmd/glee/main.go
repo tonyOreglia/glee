@@ -11,5 +11,6 @@ var ht = hashtables.Lookup
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	server := websocket.NewWebsocketServer()
+	log.Info("starting websocket server")
 	server.Start()
 }
