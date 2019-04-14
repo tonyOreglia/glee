@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/qodrorid/godaemon"
 	log "github.com/sirupsen/logrus"
 	"github.com/tonyOreglia/glee/pkg/hashtables"
 	"github.com/tonyOreglia/glee/pkg/network/websocket"
