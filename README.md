@@ -1,11 +1,10 @@
 ### Glee
-https://app.codeship.com/projects/ce798c40-40a6-0137-562b-26e8ad8a4466/status?branch=master
+[![Codeship Status for tonyOreglia/glee](https://app.codeship.com/projects/ce798c40-40a6-0137-562b-26e8ad8a4466/status?branch=master)](https://app.codeship.com/projects/335887)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tonyOreglia/glee)](https://goreportcard.com/report/github.com/tonyOreglia/glee)
 
 Glee is a chess engine written in Golang. Glee adheres to the [Universal Chess Interface (UCI) protocol](https://en.wikipedia.org/wiki/Universal_Chess_Interface) over a websocket connection on port 8081. To connect with Glee from a websocket client, connect at `/uci`. 
 
 Glee is a fully working chess engine, but is being continually improved. Progress can be tracked on the project page [here](https://github.com/users/tonyOreglia/projects/2) 
-
-[![Go Report Card](https://goreportcard.com/badge/github.com/tonyOreglia/glee)](https://goreportcard.com/report/github.com/tonyOreglia/glee)
 
 
 ### Core Technical Concepts/Inspiration
