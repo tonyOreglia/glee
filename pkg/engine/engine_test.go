@@ -50,12 +50,18 @@ func TestMinMax(t *testing.T) {
 	for _, tt := range flagtests {
 		perft, singlePlyPerft := setup()
 		pos, _ := position.NewPositionFen(tt.fen)
+		var evalScore int
+		var root bool
+		engineMove := &moves.Move{}
 		MinMax(SearchParams{
-			Depth:          tt.depth,
-			Ply:            tt.depth,
-			Pos:            &pos,
-			Perft:          &perft,
-			SinglePlyPerft: &singlePlyPerft,
+			Depth:          	tt.depth,
+			Ply:            	tt.depth,
+			Pos:            	&pos,
+			Perft:          	&perft,
+			SinglePlyPerft: 	&singlePlyPerft,
+			EngineMove:     	engineMove,
+			EvaluationScore: 	evalScore,
+			Root:            	root,
 		})
 		assert.Equal(t, tt.expectedNodes, perft, tt.name)
 	}
