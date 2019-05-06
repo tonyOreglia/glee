@@ -3,7 +3,7 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/tonyOreglia/glee/pkg/hashtables"
-	"github.com/tonyOreglia/glee/pkg/network/websocket"
+	"github.com/tonyOreglia/glee/pkg/websocket"
 )
 
 var ht = hashtables.Lookup
