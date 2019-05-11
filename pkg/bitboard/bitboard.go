@@ -76,9 +76,8 @@ func (b *Bitboard) RemoveOverlappingBits(bb *Bitboard) *Bitboard {
 	return b
 }
 
-func (b *Bitboard) SetBit(bit int) error {
+func (b *Bitboard) SetBit(bit int) {
 	b.bitboard |= uint64(1) << uint(bit)
-	return nil
 }
 
 func GetShiftedLeftBb(b *Bitboard, shift uint) *Bitboard {
@@ -132,9 +131,8 @@ func (b *Bitboard) Lsb() int {
 	return int(bits.TrailingZeros64(b.Value()))
 }
 
-func (b *Bitboard) RemoveBit(pos int) error {
+func (b *Bitboard) RemoveBit(pos int) {
 	b.bitboard &= ^(uint64(1) << uint(pos))
-	return nil
 }
 
 func (b *Bitboard) Print() {
