@@ -11,7 +11,7 @@ import (
 
 var ht = hashtables.Lookup
 
-func TestGenerateMoves(t *testing.T) {
+func TestGeneratePsuedoLegalMoves(t *testing.T) {
 	tests := map[string]struct {
 		pos           string
 		generateMoves func(*position.Position) *moves.Moves
