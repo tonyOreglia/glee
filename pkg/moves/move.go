@@ -48,7 +48,14 @@ func (m *Move) Print() {
 }
 
 func (m *Move) String() string {
-	return ConvertIndexToAlgebraic(m.origin) + ConvertIndexToAlgebraic(m.destination)
+	mvString := ConvertIndexToAlgebraic(m.origin) + ConvertIndexToAlgebraic(m.destination)
+	if (m.promotion > 0) && (m.destination < 8) {
+		mvString += "Q"
+	}
+	if (m.promotion > 0) && (m.destination > 55) {
+		mvString += "q"
+	}
+	return mvString
 }
 
 func ConvertIndexToAlgebraic(index int) string {
