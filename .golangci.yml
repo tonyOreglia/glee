@@ -1,0 +1,68 @@
+# This file contains all available configuration options with their default values.
+linters-settings:
+  errcheck:
+    # report about not checking of errors in type assetions: `a := b.(MyStruct)`;
+    check-type-assertions: true
+    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
+    check-blank: true
+  govet:
+    # report about shadowed variables
+    check-shadowing: true
+  golint:
+    # minimal confidence for issues
+    min-confidence: 0
+  gocyclo:
+    # minimal code complexity to report
+    min-complexity: 30
+  maligned:
+    # print struct with more effective memory layout or not
+    suggest-new: true
+  dupl:
+    # tokens count to trigger issue
+    threshold: 200
+  goconst:
+    # minimal length of string constant
+    min-len: 2
+    min-occurrences: 2
+  depguard:
+    list-type: blacklist
+  misspell:
+    # Correct spellings using locale preferences for US
+    locale: US
+  goimports:
+    # put imports beginning with prefix after 3rd-party packages
+    local-prefixes: github.com/SafetyCulture/api-insights-web
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - structcheck
+    - varcheck
+    - ineffassign
+    - deadcode
+    - golint
+    - unconvert
+    - dupl
+    - goconst
+    - gocyclo
+    - gofmt
+    - maligned
+    - depguard
+    - misspell
+    - unparam
+    - nakedret
+    - prealloc
+    - gocritic
+    - gochecknoinits
+    - gochecknoglobals
+  disable:
+    - gosec
+    - megacheck # already covered by other linters.
+    - typecheck # disabled temporarily, seems to be broken with Go 1.11
+    - goimports # disabled temporarily, seems to be broken when run inside Docker.
+    - scopelint # disabled until go crew decide whether need it or not
+
