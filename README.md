@@ -2,9 +2,15 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/tonyOreglia/glee)](https://goreportcard.com/report/github.com/tonyOreglia/glee)
 
 ## Play against this engine at [tonycodes.com/chess](https://tonycodes.com/chess)
-Frontent Implemented in Reactjs:
+Frontent Implemented in Reactjs
+
+It allows playing as white or black. Reverting to any previous position in the game: 
 
 ![Alt Text](https://media.giphy.com/media/ZFoCNomY69dgvrfbNp/giphy.gif)
+
+It also allows setting an arbitrary position using [Forsyth Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation):
+![Alt Text](https://media.giphy.com/media/KenCXMBrn6GLbKjNkD/giphy.gif)
+
 
 ### Overview 
 Glee is a chess engine written in Golang. Glee adheres to the [Universal Chess Interface (UCI) protocol](https://en.wikipedia.org/wiki/Universal_Chess_Interface) over a websocket connection on port 8081. To connect with Glee from a websocket client, connect at `/uci`. 
