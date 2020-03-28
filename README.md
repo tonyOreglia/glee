@@ -1,7 +1,8 @@
 ### Glee
 [![Go Report Card](https://goreportcard.com/badge/github.com/tonyOreglia/glee)](https://goreportcard.com/report/github.com/tonyOreglia/glee)
 
-## Play this engine at [tonycodes.com/chess](https://tonycodes.com/chess) 
+## Play against this engine at [tonycodes.com/chess](https://tonycodes.com/chess)
+Frontent Implemented in Reactjs:
 
 ![Alt Text](https://media.giphy.com/media/ZFoCNomY69dgvrfbNp/giphy.gif)
 
