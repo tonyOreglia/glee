@@ -3,7 +3,7 @@
 
 ## Play this engine at [tonycodes.com/chess](https://tonycodes.com/chess) 
 
-![Alt Text](https://media.giphy.com/media/ZFoCNomY69dgvrfbNp/200w_d.gif)
+![Alt Text](https://media.giphy.com/media/ZFoCNomY69dgvrfbNp/giphy.gif)
 
 ### Overview 
 Glee is a chess engine written in Golang. Glee adheres to the [Universal Chess Interface (UCI) protocol](https://en.wikipedia.org/wiki/Universal_Chess_Interface) over a websocket connection on port 8081. To connect with Glee from a websocket client, connect at `/uci`. 
