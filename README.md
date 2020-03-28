@@ -1,11 +1,9 @@
 ### Glee
 [![Go Report Card](https://goreportcard.com/badge/github.com/tonyOreglia/glee)](https://goreportcard.com/report/github.com/tonyOreglia/glee)
 
-## Play this engine at [tonycodes.com](https://tonycodes.com/) 
+## Play this engine at [tonycodes.com/chess](https://tonycodes.com/chess) 
 
-<iframe src='https://gfycat.com/ifr/ElatedBitterDragon' frameborder='0' scrolling='no' allowfullscreen width='640' height='396'></iframe>
-
-<iframe src='https://gfycat.com/ifr/KeenDamagedAustraliancurlew' frameborder='0' scrolling='no' allowfullscreen width='640' height='404'></iframe><p><a href="https://gfycat.com/discover/cdc-gifs">from Cdc GIFs</a> <a href="https://gfycat.com/keendamagedaustraliancurlew-social-distancing-surgeon-general-coronavirus">via Gfycat</a></p>
+![Alt Text](https://gfycat.com/keendamagedaustraliancurlew)
 
 ### Overview 
 Glee is a chess engine written in Golang. Glee adheres to the [Universal Chess Interface (UCI) protocol](https://en.wikipedia.org/wiki/Universal_Chess_Interface) over a websocket connection on port 8081. To connect with Glee from a websocket client, connect at `/uci`. 
