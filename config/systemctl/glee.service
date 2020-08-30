@@ -1,0 +1,18 @@
+[Unit]
+Description=Chess Engine websocket interface
+Documentation=https://github.com/tonyOreglia/glee
+ConditionPathExists=/home/tony/dev/glee
+Wants=network.target
+After=network.target
+ 
+[Service]
+Type=simple
+DynamicUser=yes
+LimitNOFILE=1024
+Restart=on-failure
+RestartSec=10
+Environment="ADDR=127.0.0.1:8080"
+ExecStart=/usr/local/bin/glee
+ 
+[Install]
+WantedBy=multi-user.target

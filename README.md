@@ -54,3 +54,20 @@ See project [here](https://github.com/users/tonyOreglia/projects/2)
 
 ### Contact
 - tony.oreglia@gmail.com
+
+
+### Setting this up as a backend webscocket for my personal website 
+1. Run it on the same machine that the website is running on
+Typically website will be behind nginx. 
+1. Nginx should expect websocket traffic from the website on 8443 and reroute to this backend unencyrpted at 127.0.0.1:8080
+1. To run this engine on port 8080 run : 
+```
+$ export ADDR=127.0.0.1:8080
+```
+1. Then run 
+```
+$ go run cmd/glee/main.go
+```
+
+
+#### To set up with systemctl
