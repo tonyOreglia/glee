@@ -37,8 +37,6 @@ func CLI() {
 			pos.Print()
 		case "eval":
 			fmt.Printf("score: %d\n", evaluate.EvaluatePosition(pos))
-		case "uci":
-			// UCI()
 		case "undo":
 			undo(pos)
 			mvs = generate.GenerateMoves(pos)
@@ -66,7 +64,7 @@ func CLI() {
 func printHelp() {
 	fmt.Printf("Glee %s - GoLang chEss Engine\n", version)
 	fmt.Println("quit............terminates the program")
-	fmt.Println("uci.............switch to uci-mode")
+	// fmt.Println("uci.............switch to uci-mode")
 	fmt.Println("e2e4............moves piece")
 	fmt.Println("e7e8Q...........promotion move resulting in Queen [Q,R,B,N]")
 	// fmt.Println("st #............sets search time per move (1-300s)")
@@ -103,6 +101,18 @@ func play(p *position.Position, humanSide int) *position.Position {
 				}
 				if string(move) == "quit" {
 					return p
+				}
+				if string(move) == "fen" {
+					p.PrintFen()
+					break
+				}
+				if string(move) == "help" {
+					fmt.Printf("\nGlee %s - GoLang chEss Engine\n", version)
+					fmt.Println("e2e4............moves piece")
+					fmt.Println("e7e8Q...........promotion move resulting in Queen [Q,R,B,N]")
+					fmt.Println("fen.............outputs FEN of board position")
+					fmt.Println("quit............terminates the game")
+					break;
 				}
 				if handleMove(string(move), p, generate.GenerateMoves(p)) {
 					break

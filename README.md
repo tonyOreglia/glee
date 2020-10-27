@@ -66,8 +66,15 @@ $ export ADDR=127.0.0.1:8080
 ```
 1. Then run 
 ```
-$ go run cmd/glee/main.go
+$ go run cmd/glee/main.go --serve
 ```
 
+### Setting this up as a backend webscocket for my personal website 
+Run
+```
+$ go run cmd/glee/main.go
+```
+Type 'help' for help menu.
 
 #### To set up with systemctl
+See `/config/systemctl/README.md`
