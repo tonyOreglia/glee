@@ -12,6 +12,7 @@ LimitNOFILE=1024
 Restart=on-failure
 RestartSec=10
 Environment="ADDR=127.0.0.1:8080"
+Environment="SERVE=1"
 ExecStart=/usr/local/bin/glee
  
 [Install]
