@@ -27,6 +27,7 @@
 1. Start the service 
     ```
     $ sudo systemctl glee start
+    $ // if this fails with 'unknown operation' try `sudo systemctl start glee`
     ```
 1. Monitor the service ouput 
     ```
