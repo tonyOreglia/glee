@@ -70,6 +70,13 @@ $ go run cmd/glee/main.go --serve
 ```
 
 ### Setting this up as a backend webscocket for my personal website 
+
+Make sure to unblock the websocket port; i.e: 
+
+```
+$ sudo ufw allow 8443/tcp
+```
+
 Run
 ```
 $ go run cmd/glee/main.go
